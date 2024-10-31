@@ -1,0 +1,43 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Modelos de IA</h2>
+    <% if current_user&.is_superuser %>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newModelModal">
+        <i class="fas fa-plus me-2"></i>Nuevo Modelo
+      </button>
+    <% end %>
+  </div>
+
+  <div class="row">
+    <% @models.each do |model| %>
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 class="card-title"><%= model.name %></h5>
+                <span class="badge <%= model.active ? 'bg-success' : 'bg-secondary' %>">
+                  <%= model.active ? 'Activo' : 'Inactivo' %>
+                </span>
+              </div>
+            </div>
+            
+            <p class="card-text">
+              <small class="text-muted">
+                Tamaño: <%= number_to_human_size(model.size_bytes) %>
+              </small>
+            </p>
+            
+            <div class="d-flex gap-2">
+              <%= link_to 'Ver Gestos', model_gestures_path(model), class: 'btn btn-outline-primary btn-sm' %>
+              <% if current_user&.is_superuser %>
+                <%= link_to 'Editar', edit_model_path(model), class: 'btn btn-outline-secondary btn-sm' %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+<%= render 'models/modal_new' if current_user&.is_superuser %>

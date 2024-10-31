@@ -1,0 +1,59 @@
+<div class="container mt-4">
+  <h2>Estadísticas de Uso</h2>
+
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Uso de Casilleros - Últimos 7 días</h5>
+          <%= column_chart @usage_data, 
+              ytitle: "Porcentaje de uso",
+              suffix: "%",
+              colors: ["#4e73df"] %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Resumen</h5>
+          <ul class="list-unstyled">
+            <li class="mb-3">
+              <strong>Día con Mayor Uso:</strong><br>
+              <%= @peak_day %> (<%= @peak_usage %>%)
+            </li>
+            <li class="mb-3">
+              <strong>Día con Menor Uso:</strong><br>
+              <%= @lowest_day %> (<%= @lowest_usage %>%)
+            </li>
+            <li>
+              <strong>Promedio Semanal:</strong><br>
+              <%= @average_usage %>%
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Gestos más utilizados</h5>
+          <%= pie_chart @gesture_stats %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Intentos fallidos por casillero</h5>
+          <%= bar_chart @failed_attempts %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

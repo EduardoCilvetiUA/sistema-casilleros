@@ -1,0 +1,55 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2>Casilleros - <%= @controller.name %></h2>
+      <p class="text-muted"><%= @controller.location %></p>
+    </div>
+    
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newLockerModal">
+      <i class="fas fa-plus me-2"></i>Nuevo Casillero
+    </button>
+  </div>
+
+  <div class="row">
+    <% @lockers.each do |locker| %>
+      <div class="col-md-3 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="card-title">Casillero #<%= locker.number %></h5>
+              <span class="badge <%= locker.state ? 'bg-success' : 'bg-secondary' %>">
+                <%= locker.state ? 'Abierto' : 'Cerrado' %>
+              </span>
+            </div>
+            
+            <p class="card-text">
+              <small class="text-muted">Dueño: <%= locker.owner_email %></small>
+            </p>
+            
+            <button class="btn btn-outline-primary btn-sm w-100 mb-2" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#updatePasswordModal"
+                    data-locker-id="<%= locker.id %>">
+              Actualizar Contraseña
+            </button>
+            
+            <button class="btn btn-outline-info btn-sm w-100"
+                    data-bs-toggle="modal"
+                    data-bs-target="#viewPasswordModal"
+                    data-locker-id="<%= locker.id %>">
+              Ver Contraseña Actual
+            </button>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Modal para nuevo casillero -->
+<%= render 'lockers/modal_new' %>
+<!-- Modal para actualizar contraseña -->
+<%= render 'lockers/modal_update_password' %>
+<!-- Modal para ver contraseña actual -->
+<%= render 'lockers/modal_view_password' %>
+

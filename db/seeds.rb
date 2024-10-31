@@ -1,63 +1,163 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+# db/seeds.rb
 
-# Create default users
-users = [
-  { email: 'admin@example.com', password: 'password', name: 'Admin User' },
-  { email: 'user1@example.com', password: 'password', name: 'User One' },
-  { email: 'user2@example.com', password: 'password', name: 'User Two' }
-]
+# Limpiar la base de datos existente
+puts "Limpiando base de datos..."
+ModelUpdate.destroy_all
+LockerPassword.destroy_all
+LockerEvent.destroy_all
+Locker.destroy_all
+Gesture.destroy_all
+Controller.destroy_all
+Model.destroy_all
+User.destroy_all
 
-users.each do |user_data|
-  User.find_or_create_by!(email: user_data[:email]) do |u|
-    u.password = user_data[:password]
-    u.password_confirmation = user_data[:password]
-    u.name = user_data[:name]
+puts "Creando usuarios..."
+# Crear superusuario
+super_user = User.create!(
+  email: 'admin@example.com',
+  password: 'password123',
+  name: 'Super Admin',
+  is_superuser: true,
+  provider: 'google_oauth2',
+  uid: '123456789',
+  avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
+)
+
+# Crear usuarios normales
+normal_users = 5.times.map do |i|
+  User.create!(
+    email: "user#{i+1}@example.com",
+    password: 'password123',
+    name: "User #{i+1}",
+    is_superuser: false,
+    provider: 'google_oauth2',
+    uid: "user#{i+1}",
+    avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=user#{i+1}"
+  )
+end
+
+puts "Creando modelos de IA..."
+# Crear modelos de IA
+models = [
+  {
+    name: "Modelo Básico v1",
+    active: false,
+    file_path: "/models/basic_v1.h5",
+    size_bytes: 500000
+  },
+  {
+    name: "Modelo Estándar v2",
+    active: true,
+    file_path: "/models/standard_v2.h5",
+    size_bytes: 750000
+  },
+  {
+    name: "Modelo Premium v3",
+    active: true,
+    file_path: "/models/premium_v3.h5",
+    size_bytes: 1000000
+  }
+].map { |model_data| Model.create!(model_data) }
+
+puts "Creando gestos..."
+# Gestos para cada modelo
+GESTURE_NAMES = ['Puño', 'Palma', 'Victoria', 'OK', 'Pulgar Arriba', 'Señalar']
+GESTURE_SYMBOLS = ['👊', '✋', '✌️', '👌', '👍', '👆']
+
+models.each do |model|
+  GESTURE_NAMES.each_with_index do |name, index|
+    Gesture.create!(
+      name: name,
+      symbol: GESTURE_SYMBOLS[index],
+      model: model
+    )
   end
 end
 
-# Create controllers
-controllers = [
-  { name: 'Controller 1', location: 'Building A', user: User.find_by(email: 'admin@example.com') },
-  { name: 'Controller 2', location: 'Building B', user: User.find_by(email: 'user1@example.com') },
-  { name: 'Controller 3', location: 'Building C', user: User.find_by(email: 'user2@example.com') }
-]
+puts "Creando controladores..."
+# Crear controladores
+locations = ['Edificio A', 'Edificio B', 'Edificio C', 'Cafetería', 'Biblioteca']
+controllers = []
 
-controllers.each do |controller_data|
-  Controller.find_or_create_by!(name: controller_data[:name], location: controller_data[:location], user: controller_data[:user])
+normal_users.each_with_index do |user, index|
+  2.times do |i|
+    controllers << Controller.create!(
+      name: "Controlador #{index*2 + i + 1}",
+      location: locations[index],
+      user: user,
+      model: models.sample,
+      is_connected: [true, false].sample,
+      last_connection: [Time.current, 15.minutes.ago, 1.hour.ago].sample
+    )
+  end
 end
 
-# Create lockers
-lockers = [
-  { number: 101, state: true, owner_email: 'owner1@example.com', controller: Controller.find_by(name: 'Controller 1') },
-  { number: 102, state: false, owner_email: 'owner2@example.com', controller: Controller.find_by(name: 'Controller 1') },
-  { number: 201, state: true, owner_email: 'owner3@example.com', controller: Controller.find_by(name: 'Controller 2') },
-  { number: 202, state: false, owner_email: 'owner4@example.com', controller: Controller.find_by(name: 'Controller 2') },
-  { number: 301, state: true, owner_email: 'owner5@example.com', controller: Controller.find_by(name: 'Controller 3') },
-  { number: 302, state: false, owner_email: 'owner6@example.com', controller: Controller.find_by(name: 'Controller 3') }
-]
+puts "Creando casilleros y contraseñas..."
+# Crear casilleros y sus contraseñas
+controllers.each do |controller|
+  4.times do |i|
+    locker = Locker.create!(
+      number: i + 1,
+      state: [true, false].sample,
+      owner_email: "cliente#{controller.id}_#{i+1}@example.com",
+      controller: controller
+    )
 
-lockers.each do |locker_data|
-  Locker.find_or_create_by!(number: locker_data[:number], state: locker_data[:state], owner_email: locker_data[:owner_email], controller: locker_data[:controller])
+    # Crear contraseña aleatoria de 4 gestos
+    gestures = controller.model.gestures.sample(4)
+    gestures.each_with_index do |gesture, position|
+      LockerPassword.create!(
+        locker: locker,
+        gesture: gesture,
+        position: position
+      )
+    end
+
+    # Crear eventos para cada casillero
+    20.times do
+      event_date = rand(30.days).seconds.ago
+      LockerEvent.create!(
+        locker: locker,
+        event_type: ['open', 'close', 'password_attempt'].sample,
+        success: [true, true, true, false].sample, # 75% de éxito
+        event_time: event_date,
+        created_at: event_date,
+        updated_at: event_date
+      )
+    end
+  end
 end
 
-# Create models
-models = [
-  { name: 'Model 1', active: true },
-  { name: 'Model 2', active: false },
-  { name: 'Model 3', active: true },
-  { name: 'Model 4', active: false },
-  { name: 'Model 5', active: true },
-  { name: 'Model 6', active: false }
-]
-
-models.each do |model_data|
-  Model.find_or_create_by!(name: model_data[:name], active: model_data[:active])
+puts "Creando actualizaciones de modelos..."
+# Crear historial de actualizaciones de modelos
+controllers.each do |controller|
+  3.times do
+    start_date = rand(30.days).seconds.ago
+    completed_date = start_date + rand(30.minutes)
+    status = ['completed', 'failed', 'pending', 'in_progress'].sample
+    
+    ModelUpdate.create!(
+      controller: controller,
+      model: models.sample,
+      status: status,
+      started_at: start_date,
+      completed_at: ['completed', 'failed'].include?(status) ? completed_date : nil,
+      created_at: start_date,
+      updated_at: completed_date
+    )
+  end
 end
+
+puts "Seed completado!"
+
+# Imprimir algunas estadísticas
+puts "\nEstadísticas de la base de datos:"
+puts "--------------------------------"
+puts "Usuarios creados: #{User.count}"
+puts "Modelos creados: #{Model.count}"
+puts "Gestos creados: #{Gesture.count}"
+puts "Controladores creados: #{Controller.count}"
+puts "Casilleros creados: #{Locker.count}"
+puts "Contraseñas de casilleros creadas: #{LockerPassword.count}"
+puts "Eventos de casilleros creados: #{LockerEvent.count}"
+puts "Actualizaciones de modelos creadas: #{ModelUpdate.count}"

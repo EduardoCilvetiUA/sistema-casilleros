@@ -1,0 +1,100 @@
+<div class="modal fade" 
+     id="newModelModal" 
+     tabindex="-1"
+     data-controller="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo Modelo de IA</h5>
+        <button type="button" 
+                class="btn-close" 
+                data-action="modal#close" 
+                aria-label="Close"></button>
+      </div>
+      
+      <%= form_with(model: @new_model, 
+                    local: true, 
+                    multipart: true,
+                    data: { 
+                      action: "submit->modal#submitForm"
+                    }) do |f| %>
+        <div class="modal-body">
+          <div class="mb-3">
+            <%= f.label :name, 'Nombre del Modelo', class: 'form-label' %>
+            <%= f.text_field :name, class: 'form-control', required: true %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :file, 'Archivo del Modelo', class: 'form-label' %>
+            <%= f.file_field :file, 
+                           class: 'form-control', 
+                           accept: '.h5,.tflite', 
+                           required: true,
+                           data: { 
+                             max_size: 5.megabytes 
+                           } %>
+            <small class="text-muted">Tamaño máximo: 5MB. Formatos permitidos: .h5, .tflite</small>
+          </div>
+
+          <div class="mb-3">
+            <div class="form-check">
+              <%= f.check_box :active, class: 'form-check-input' %>
+              <%= f.label :active, '¿Activar modelo inmediatamente?', class: 'form-check-label' %>
+            </div>
+          </div>
+
+          <div class="gestures-section">
+            <h6 class="mb-3">Gestos del Modelo</h6>
+            
+            <div class="gestures-container">
+              <% 6.times do |i| %>
+                <div class="gesture-input-group mb-3">
+                  <div class="row">
+                    <div class="col">
+                      <%= f.fields_for :gestures do |gesture| %>
+                        <%= gesture.text_field :name, 
+                            placeholder: "Nombre del gesto #{i + 1}", 
+                            class: 'form-control',
+                            required: true %>
+                    </div>
+                    <div class="col">
+                        <%= gesture.text_field :symbol, 
+                            placeholder: "Símbolo #{i + 1}", 
+                            class: 'form-control',
+                            required: true %>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" 
+                  class="btn btn-secondary" 
+                  data-action="modal#close">Cancelar</button>
+          <%= f.submit 'Crear Modelo', class: 'btn btn-primary' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<% content_for :javascript do %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const fileInput = document.querySelector('input[type="file"]');
+      const maxSize = parseInt(fileInput.dataset.maxSize);
+
+      fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file.size > maxSize) {
+          alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+          this.value = '';
+        }
+      });
+    });
+  </script>
+<% end %>

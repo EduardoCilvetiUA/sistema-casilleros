@@ -1,0 +1,56 @@
+<nav class="navbar navbar-expand-lg shadow-sm">
+  <div class="container">
+    <%= link_to "Sistema de Casilleros", dashboard_path, class: "navbar-brand" %>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <%= link_to dashboard_path, class: "nav-link #{current_page?(dashboard_path) ? 'active' : ''}" do %>
+            <i class="fas fa-chart-line me-2"></i>Dashboard
+          <% end %>
+        </li>
+        <li class="nav-item">
+          <%= link_to controllers_path, class: "nav-link #{controller_name == 'controllers' ? 'active' : ''}" do %>
+            <i class="fas fa-microchip me-2"></i>Controladores
+          <% end %>
+        </li>
+        <li class="nav-item">
+          <%= link_to models_path, class: "nav-link #{controller_name == 'models' ? 'active' : ''}" do %>
+            <i class="fas fa-brain me-2"></i>Modelos
+          <% end %>
+        </li>
+        <li class="nav-item">
+          <%= link_to metrics_usage_stats_path, class: "nav-link #{controller_name == 'metrics' ? 'active' : ''}" do %>
+            <i class="fas fa-chart-bar me-2"></i>Métricas
+          <% end %>
+        </li>
+      </ul>
+      
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" 
+            data-controller="dropdown"
+            data-bs-toggle="dropdown" 
+            href="#" 
+            role="button" 
+            aria-expanded="false">
+            <i class="fas fa-user-circle me-2"></i><%= current_user.name || current_user.email %>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <%= button_to destroy_user_session_path, 
+                            method: :delete, 
+                            class: "dropdown-item" do %>
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+              <% end %>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

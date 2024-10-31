@@ -21,6 +21,7 @@
   color: var(--text-primary);
   position: relative;
   overflow-x: hidden;
+  z-index: auto; // Ensure content is above the background
 }
 
 .animated-bg {
@@ -44,60 +45,95 @@
 
 /* Navbar Styling */
 .navbar {
-    .nav-link.dropdown-toggle {
-      cursor: pointer;
-      padding: 0.5rem 1rem;
-      background: none;
-      border: none;
-      color: var(--text-secondary) !important;
-      
-      &:hover {
-        color: var(--text-primary) !important;
-      }
-      
-      &:after {
-        margin-left: 0.5rem;
-      }
+  background-color: var(--dark-surface);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  .navbar-brand {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: var(--accent);
     }
+  }
+
+  .nav-link {
+    color: var(--text-secondary) !important;
+    transition: color 0.3s ease;
+
+    &.active {
+      color: var(--text-primary) !important;
+    }
+
+    &:hover {
+      color: var(--text-primary) !important;
+    }
+  }
+
+  .nav-link.dropdown-toggle {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary) !important;
+
+    &:hover {
+      color: var(--text-primary) !important;
+    }
+
+    &:after {
+      margin-left: 0.5rem;
+    }
+  }
+
+  .dropdown-menu {
+    background-color: var(--dark-surface);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 0.5rem;
+    padding: 0.5rem 0;
     
-    .dropdown-menu {
-      background-color: var(--dark-surface);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      margin-top: 0.5rem;
+    .dropdown-item {
+      color: var(--text-secondary);
+      padding: 0.75rem 1.5rem;
+      transition: all 0.2s ease;
       
-      .dropdown-item {
-        color: var(--text-secondary);
-        padding: 0.5rem 1rem;
-        
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.1);
-          color: var(--text-primary);
-        }
-        
-        i {
-          width: 1.5rem;
-        }
+      &:hover, &:focus {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
       }
-    }
-    .navbar-brand {
-      color: var(--text-primary);
-      font-size: 1.5rem;
-      font-weight: 600;
-      transition: color 0.3s ease;
       
-      &:hover {
-        color: var(--accent);
+      &:active {
+        background-color: rgba(255, 255, 255, 0.15);
       }
     }
   }
-  
+  .dropdown-item {
+    form {
+      margin: 0;
+    }
+    
+    button {
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      padding: 0;
+      color: inherit;
+      
+      &:hover {
+        color: inherit;
+      }
+    }
+  }
+}  
 
 /* Card Styling */
 .card {
   background: var(--dark-surface);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   
   &:hover {
@@ -203,3 +239,56 @@
     border-left: 4px solid var(--danger);
   }
 }
+.gesture-btn {
+  font-size: 1.5rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gesture-placeholder {
+  width: 50px;
+  height: 50px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.gesture-display {
+  width: 50px;
+  height: 50px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+.gesture-input-group {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+}
+.gesture-input-group:hover {
+  background-color: #e9ecef;
+}
+
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+
+.modal {
+  z-index: 1050 !important;
+}
+
+// Prevenir scroll cuando el modal está abierto
+body.modal-open {
+  overflow: hidden;
+  padding-right: 0 !important;
+}
+

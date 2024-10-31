@@ -73,3 +73,7 @@ gem 'popper_js'
 
 
 gem 'pg'  # Para PostgreSQL
+
+
+gem 'chartkick'
+gem 'groupdate'

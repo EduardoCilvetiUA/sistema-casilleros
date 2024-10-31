@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_31_135443) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_31_185610) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,7 +20,40 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_31_135443) do
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_connected", default: false
+    t.datetime "last_connection"
+    t.bigint "model_id", null: false
+    t.index ["model_id"], name: "index_controllers_on_model_id"
     t.index ["user_id"], name: "index_controllers_on_user_id"
+  end
+
+  create_table "gestures", force: :cascade do |t|
+    t.string "name"
+    t.string "symbol"
+    t.bigint "model_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["model_id"], name: "index_gestures_on_model_id"
+  end
+
+  create_table "locker_events", force: :cascade do |t|
+    t.bigint "locker_id", null: false
+    t.string "event_type"
+    t.boolean "success"
+    t.datetime "event_time"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["locker_id"], name: "index_locker_events_on_locker_id"
+  end
+
+  create_table "locker_passwords", force: :cascade do |t|
+    t.bigint "locker_id", null: false
+    t.bigint "gesture_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["gesture_id"], name: "index_locker_passwords_on_gesture_id"
+    t.index ["locker_id"], name: "index_locker_passwords_on_locker_id"
   end
 
   create_table "lockers", force: :cascade do |t|
@@ -33,11 +66,25 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_31_135443) do
     t.index ["controller_id"], name: "index_lockers_on_controller_id"
   end
 
+  create_table "model_updates", force: :cascade do |t|
+    t.bigint "controller_id", null: false
+    t.bigint "model_id", null: false
+    t.string "status"
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["controller_id"], name: "index_model_updates_on_controller_id"
+    t.index ["model_id"], name: "index_model_updates_on_model_id"
+  end
+
   create_table "models", force: :cascade do |t|
     t.string "name"
     t.boolean "active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "file_path"
+    t.integer "size_bytes"
   end
 
   create_table "users", force: :cascade do |t|
@@ -52,10 +99,18 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_31_135443) do
     t.string "provider"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_superuser", default: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "controllers", "models"
   add_foreign_key "controllers", "users"
+  add_foreign_key "gestures", "models"
+  add_foreign_key "locker_events", "lockers"
+  add_foreign_key "locker_passwords", "gestures"
+  add_foreign_key "locker_passwords", "lockers"
   add_foreign_key "lockers", "controllers"
+  add_foreign_key "model_updates", "controllers"
+  add_foreign_key "model_updates", "models"
 end

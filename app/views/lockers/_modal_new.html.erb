@@ -1,0 +1,41 @@
+<div class="modal fade" 
+     id="newLockerModal" 
+     tabindex="-1"
+     data-controller="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo Casillero</h5>
+        <button type="button" 
+                class="btn-close" 
+                data-action="modal#close" 
+                aria-label="Close"></button>
+      </div>
+      
+      <%= form_with(model: [@controller, @new_locker], 
+                    local: true,
+                    data: { 
+                      action: "submit->modal#submitForm"
+                    }) do |f| %>
+        <div class="modal-body">
+          <div class="mb-3">
+            <%= f.label :number, 'Número', class: 'form-label' %>
+            <%= f.number_field :number, class: 'form-control' %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :owner_email, 'Email del Dueño', class: 'form-label' %>
+            <%= f.email_field :owner_email, class: 'form-control' %>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" 
+                  class="btn btn-secondary" 
+                  data-action="modal#close">Cancelar</button>
+          <%= f.submit 'Crear Casillero', class: 'btn btn-primary' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
