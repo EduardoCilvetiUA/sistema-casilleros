@@ -1,0 +1,11 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+
+development:
+  <<: *default
+  database: casilleros
+  username: laloc
+  password: postgres  # Asegúrate de que esta línea tenga la nueva contraseña
+  host: localhost

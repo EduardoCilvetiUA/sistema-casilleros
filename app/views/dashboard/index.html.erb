@@ -1,0 +1,84 @@
+<div class="container mt-4">
+<nav class="navbar navbar-expand-lg">
+<div class="container-fluid">
+  <a class="navbar-brand">Sistema de Casilleros</a>
+  
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  
+  <div class="collapse navbar-collapse" id="navbarContent">
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item dropdown">
+        <button class="nav-link dropdown-toggle btn btn-link" 
+                data-controller="dropdown"
+                data-bs-toggle="dropdown" 
+                aria-expanded="false"
+                type="button">
+          <i class="fas fa-user-circle me-2"></i>
+          <%= current_user.name || current_user.email %>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <%= button_to destroy_user_session_path, 
+                        method: :delete, 
+                        class: "dropdown-item" do %>
+              <i class="fas fa-sign-out-alt me-2"></i>
+              Cerrar sesión
+            <% end %>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+</nav>
+
+  <div class="row mb-4">
+    <div class="col">
+      <h1>Dashboard</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 mb-4">
+      <div class="card stats-card">
+        <div class="card-body">
+          <i class="fas fa-users stats-icon"></i>
+          <h5 class="card-title">Usuarios Activos</h5>
+          <h2 class="mb-0"><%= @active_users %></h2>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+      <div class="card stats-card">
+        <div class="card-body">
+          <i class="fas fa-microchip stats-icon"></i>
+          <h5 class="card-title">Controladores</h5>
+          <h2 class="mb-0"><%= @controllers %></h2>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+      <div class="card stats-card">
+        <div class="card-body">
+          <i class="fas fa-box stats-icon"></i>
+          <h5 class="card-title">Casilleros Totales</h5>
+          <h2 class="mb-0"><%= @total_lockers %></h2>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+      <div class="card stats-card">
+        <div class="card-body">
+          <i class="fas fa-door-open stats-icon"></i>
+          <h5 class="card-title">Aperturas (24h)</h5>
+          <h2 class="mb-0"><%= @last_24h_openings %></h2>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
