@@ -8,7 +8,7 @@
         <h5 class="modal-title">Nuevo Modelo de IA</h5>
         <button type="button" 
                 class="btn-close" 
-                data-action="modal#close" 
+                data-bs-dismiss="modal" 
                 aria-label="Close"></button>
       </div>
       
@@ -74,7 +74,7 @@
         <div class="modal-footer">
           <button type="button" 
                   class="btn btn-secondary" 
-                  data-action="modal#close">Cancelar</button>
+                  data-bs-dismiss="modal">Cancelar</button>
           <%= f.submit 'Crear Modelo', class: 'btn btn-primary' %>
         </div>
       <% end %>

@@ -3,12 +3,8 @@ class ControllersController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    @controllers = if current_user.is_superuser?
-                    Controller.all
-                  else
-                    current_user.controllers
-                  end
-    @new_controller = Controller.new
+    @controllers = Controller.all
+    @new_controller = Controller.new  # Añade esta línea
   end
 
   def create

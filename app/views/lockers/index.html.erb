@@ -5,9 +5,13 @@
       <p class="text-muted"><%= @controller.location %></p>
     </div>
     
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newLockerModal">
+    <button type="button" 
+      class="btn btn-primary" 
+        data-action="modal#open"
+        data-bs-target="#newLockerModal">
       <i class="fas fa-plus me-2"></i>Nuevo Casillero
     </button>
+
   </div>
 
   <div class="row">

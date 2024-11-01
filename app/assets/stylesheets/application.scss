@@ -38,10 +38,6 @@
   animation: bgPulse 15s ease-in-out infinite alternate;
 }
 
-.content-wrapper {
-  position: relative;
-  z-index: 1;
-}
 
 /* Navbar Styling */
 .navbar {
@@ -278,17 +274,37 @@
   background-color: #e9ecef;
 }
 
-.modal-backdrop {
-  z-index: 1040 !important;
+// Configuración de z-index para modales
+.modal {
+  z-index: 1055 !important;
 }
 
-.modal {
+.modal-backdrop {
   z-index: 1050 !important;
 }
 
-// Prevenir scroll cuando el modal está abierto
+// Estilos del modal
+.modal-content {
+  background-color: var(--dark-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  
+  .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+  }
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// Prevenir scroll en body cuando el modal está abierto
 body.modal-open {
-  overflow: hidden;
+  overflow: hidden !important;
   padding-right: 0 !important;
 }
 
