@@ -138,18 +138,64 @@
   }
   
   .card-title {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
   }
   
-  h2 {
+  .card-subtitle {
+    color: var(--text-secondary);
+    
+    i, .fas, .far, .fab {
+      color: var(--accent);
+    }
+    
+    span {
+      color: var(--text-secondary);
+    }
+  }
+  
+  .card-text {
     color: var(--text-primary);
-    font-size: 2.5rem;
+    
+    .text-muted {
+      color: var(--text-secondary) !important;
+    }
+    
+    i, .fas, .far, .fab {
+      color: var(--accent);
+    }
+    
+    span {
+      color: var(--text-primary);
+    }
+  }
+
+  // Para los números del dashboard
+  h2.mb-0 {
+    color: var(--text-primary);
     font-weight: 600;
   }
 }
+
+/* Global text utilities override */
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+// Añadir estilos específicos para la ubicación
+.card-subtitle, h6.text-muted {
+  color: var(--text-secondary) !important;
+  
+  i, .fas, .far, .fab {
+    color: var(--accent) !important;
+  }
+}
+.location-text {
+  color: var(--text-secondary) !important;
+}
+
 
 /* Dashboard Stats Cards */
 .stats-card {
