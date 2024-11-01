@@ -61,7 +61,7 @@ end
 gem 'devise' # Para autenticación
 gem 'omniauth'
 gem 'omniauth-google-oauth2' # Para login con Google
-gem 'omniauth-rails_csrf_protection', '~> 0.1.0'
+gem 'omniauth-rails_csrf_protection', '~> 1.0.2'
 
 # MQTT
 gem 'mqtt' # Para comunicación con broker
