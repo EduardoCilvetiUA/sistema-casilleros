@@ -1,0 +1,125 @@
+<div class="container mt-4">
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3 class="card-title mb-0">Pruebas MQTT</h3>
+      <div>
+        <% if @mqtt_status[:connected] %>
+          <span class="badge bg-success">Conectado al broker</span>
+        <% else %>
+          <span class="badge bg-danger">Sin conexión al broker</span>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <% if @mqtt_status[:error].present? %>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Error de conexión: <%= @mqtt_status[:error] %>
+        </div>
+      <% end %>
+
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card bg-light">
+            <div class="card-body">
+              <h5 class="card-title">Configuración del Broker</h5>
+              <ul class="list-unstyled mb-0">
+                <li><strong>Host:</strong> <%= @mqtt_status[:host] %></li>
+                <li><strong>Puerto:</strong> <%= @mqtt_status[:port] %></li>
+                <li><strong>Timeout:</strong> <%= MqttClient::TIMEOUT %> segundos</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <%= form_tag mqtt_publish_path, method: :post, class: 'mqtt-test-form', data: { turbo: false } do %>
+        <div class="mb-3">
+          <label class="form-label">Tópico</label>
+          <%= select_tag :topic, 
+            options_for_select(@topics.map { |k, v| [k.to_s.humanize, v] }), 
+            class: 'form-select topic-select' %>
+        </div>
+
+        <div class="locker-state-fields payload-fields">
+          <div class="mb-3">
+            <label class="form-label">Controlador</label>
+            <%= select_tag :controller_id, 
+              options_from_collection_for_select(@controllers, :id, :name),
+              class: 'form-select' %>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Casillero</label>
+            <%= select_tag :locker_id,
+              options_from_collection_for_select(@lockers, :id, :number),
+              class: 'form-select' %>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <%= select_tag :estado,
+              options_for_select([['Cerrado', 0], ['Abierto', 1]]),
+              class: 'form-select' %>
+          </div>
+        </div>
+
+        <div class="owner-change-fields payload-fields d-none">
+          <div class="mb-3">
+            <label class="form-label">Nuevo Dueño (Email)</label>
+            <%= text_field_tag :new_owner, nil, class: 'form-control' %>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">IDs de Gestos (separados por coma)</label>
+            <%= text_field_tag :gesture_ids, nil, class: 'form-control',
+              placeholder: 'Ej: 1,2,3,4' %>
+          </div>
+        </div>
+
+        <div class="custom-payload-fields payload-fields d-none">
+          <div class="mb-3">
+            <label class="form-label">Custom Payload (JSON)</label>
+            <%= text_area_tag :custom_payload, nil, class: 'form-control',
+              rows: 5, placeholder: '{"key": "value"}' %>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-text text-muted">
+            Broker: <%= MqttClient::DEFAULT_HOST %>:<%= MqttClient::DEFAULT_PORT %>
+          </div>
+        </div>
+
+        <%= submit_tag 'Publicar Mensaje', class: 'btn btn-primary' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%= javascript_tag do %>
+  document.addEventListener('DOMContentLoaded', function() {
+    const topicSelect = document.querySelector('.topic-select');
+    const payloadFields = document.querySelectorAll('.payload-fields');
+    
+    topicSelect.addEventListener('change', function() {
+      payloadFields.forEach(field => field.classList.add('d-none'));
+      
+      switch(this.value) {
+        case 'Estado_Casillero':
+          document.querySelector('.locker-state-fields').classList.remove('d-none');
+          break;
+        case 'Cambio_dueno':
+          document.querySelector('.owner-change-fields').classList.remove('d-none');
+          break;
+        default:
+          document.querySelector('.custom-payload-fields').classList.remove('d-none');
+      }
+    });
+
+    // Agregar manejo del botón limpiar
+    document.getElementById('clear-messages')?.addEventListener('click', function() {
+      document.getElementById('mqtt-messages').innerHTML = '';
+    });
+  });
+<% end %>

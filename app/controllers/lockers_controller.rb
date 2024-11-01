@@ -20,8 +20,19 @@ class LockersController < ApplicationController
         )
       end
       
+      # Notificar al controlador físico sobre el nuevo casillero y su contraseña
+      MqttService.publish_owner_change(@locker, @locker.owner_email, gestures)
+      
       # Enviar email con la contraseña
       LockerMailer.password_updated(@locker).deliver_later
+      
+      # Registrar el evento de creación
+      LockerEvent.create!(
+        locker: @locker,
+        event_type: 'creation',
+        success: true,
+        event_time: Time.current
+      )
       
       redirect_to controller_lockers_path(@controller), notice: 'Casillero creado exitosamente'
     else
@@ -32,15 +43,41 @@ class LockersController < ApplicationController
   def update_password
     gesture_symbols = params[:gesture_sequence]
 
-    if LockerPasswordService.update_password(@locker, gesture_symbols)
-      render json: { 
-        message: "Contraseña actualizada exitosamente",
-        locker_id: @locker.id
-      }
-    else
-      render json: { 
-        error: "Error al actualizar la contraseña"
-      }, status: :unprocessable_entity
+    ActiveRecord::Base.transaction do
+      if LockerPasswordService.update_password(@locker, gesture_symbols)
+        # Obtener los gestos actualizados para enviar al MQTT
+        updated_gestures = @locker.locker_passwords.includes(:gesture)
+                                 .order(:position)
+                                 .map(&:gesture)
+
+        # Notificar al controlador físico sobre el cambio de contraseña
+        MqttService.publish_owner_change(@locker, @locker.owner_email, updated_gestures)
+        
+        # Registrar el evento de actualización
+        LockerEvent.create!(
+          locker: @locker,
+          event_type: 'password_update',
+          success: true,
+          event_time: Time.current
+        )
+
+        render json: { 
+          message: "Contraseña actualizada exitosamente",
+          locker_id: @locker.id
+        }
+      else
+        # Registrar el evento fallido
+        LockerEvent.create!(
+          locker: @locker,
+          event_type: 'password_update',
+          success: false,
+          event_time: Time.current
+        )
+
+        render json: { 
+          error: "Error al actualizar la contraseña"
+        }, status: :unprocessable_entity
+      end
     end
   end
 

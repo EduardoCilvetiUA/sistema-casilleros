@@ -26,6 +26,10 @@ Rails.application.routes.draw do
       get 'usage_stats'
     end
   end
+  namespace :mqtt do
+    get 'test', to: 'test#index'
+    post 'publish', to: 'test#publish'
+  end
 
   root 'home#index'
 end

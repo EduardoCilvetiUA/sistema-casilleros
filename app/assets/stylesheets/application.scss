@@ -354,3 +354,54 @@ body.modal-open {
   padding-right: 0 !important;
 }
 
+.mqtt-messages {
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: monospace;
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.mqtt-message {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.mqtt-message:last-child {
+  border-bottom: none;
+}
+
+.mqtt-test-form .form-label {
+  font-weight: 500;
+}
+.mqtt-test-form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.card-header .badge {
+  float: right;
+  margin-top: -20px;
+}
+
+#flash-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1050;
+  max-width: 400px;
+}
+
+.form-text {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.payload-fields {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}

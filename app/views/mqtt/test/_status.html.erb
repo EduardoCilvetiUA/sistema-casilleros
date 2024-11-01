@@ -1,0 +1,36 @@
+<div class="card mb-4">
+  <div class="card-header">
+    <h3 class="card-title">Estado de Conexión MQTT</h3>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="mb-3">
+          <strong>Configuración:</strong>
+          <ul class="list-unstyled">
+            <li>Host: <%= @mqtt_config[:host] %></li>
+            <li>Puerto: <%= @mqtt_config[:port] %></li>
+          </ul>
+        </div>
+        <div class="mb-3">
+          <strong>Estado:</strong>
+          <% if @mqtt_connected %>
+            <span class="badge bg-success">Conectado</span>
+          <% else %>
+            <span class="badge bg-danger">Desconectado</span>
+          <% end %>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="alert alert-info">
+          <h5><i class="fas fa-info-circle"></i> Información de conexión</h5>
+          <p class="mb-0">
+            Usando broker público HiveMQ.<br>
+            No se requieren credenciales para la conexión.<br>
+            Tiempo máximo de conexión: <%= MqttClient::CONNECT_TIMEOUT %> segundos
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

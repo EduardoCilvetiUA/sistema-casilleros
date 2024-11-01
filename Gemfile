@@ -77,3 +77,4 @@ gem 'pg'  # Para PostgreSQL
 
 gem 'chartkick'
 gem 'groupdate'
+gem 'dotenv-rails'

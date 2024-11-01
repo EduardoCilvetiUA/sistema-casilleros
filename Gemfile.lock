@@ -114,6 +114,10 @@ GEM
       responders
       warden (~> 1.2.3)
     diff-lcs (1.5.1)
+    dotenv (3.1.4)
+    dotenv-rails (3.1.4)
+      dotenv (= 3.1.4)
+      railties (>= 6.1)
     drb (2.2.1)
     error_highlight (0.6.0)
     erubi (1.13.0)
@@ -420,6 +424,7 @@ DEPENDENCIES
   chartkick
   debug
   devise
+  dotenv-rails
   error_highlight
   groupdate
   importmap-rails
