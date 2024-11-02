@@ -33,15 +33,17 @@
           </div>
         </div>
       </div>
+
       <%= form_tag mqtt_publish_path, method: :post, class: 'mqtt-test-form', data: { turbo: false } do %>
         <div class="mb-3">
           <label class="form-label">Tópico</label>
           <%= select_tag :topic, 
-            options_for_select(@topics.map { |k, v| [k.to_s.humanize, v] }), 
-            class: 'form-select topic-select' %>
+              options_for_select(@topics.map { |k, v| [k.to_s.humanize, v] }), 
+              class: 'form-select topic-select' %>
         </div>
 
-        <div class="locker-state-fields payload-fields">
+        <!-- Campos para Estado_Casillero -->
+        <div class="estado-casillero-fields payload-fields">
           <div class="mb-3">
             <label class="form-label">Controlador</label>
             <%= select_tag :controller_id, 
@@ -64,12 +66,30 @@
           </div>
         </div>
 
-        <div class="owner-change-fields payload-fields d-none">
+        <!-- Campos para Cambio_dueno -->
+        <div class="cambio-dueno-fields payload-fields d-none">
+          <div class="mb-3">
+            <label class="form-label">Controlador</label>
+            <%= select_tag :controller_id, 
+              options_from_collection_for_select(@controllers, :id, :name),
+              class: 'form-select' %>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Casillero</label>
+            <%= select_tag :locker_id,
+              options_from_collection_for_select(@lockers, :id, :number),
+              class: 'form-select' %>
+          </div>
+
           <div class="mb-3">
             <label class="form-label">Nuevo Dueño (Email)</label>
             <%= text_field_tag :new_owner, nil, class: 'form-control' %>
           </div>
+        </div>
 
+        <!-- Campos para actualizar_modelo/envio -->
+        <div class="actualizar-modelo-envio-fields payload-fields d-none">
           <div class="mb-3">
             <label class="form-label">IDs de Gestos (separados por coma)</label>
             <%= text_field_tag :gesture_ids, nil, class: 'form-control',
@@ -77,6 +97,7 @@
           </div>
         </div>
 
+        <!-- Campos para otros tópicos -->
         <div class="custom-payload-fields payload-fields d-none">
           <div class="mb-3">
             <label class="form-label">Custom Payload (JSON)</label>
@@ -97,29 +118,118 @@
   </div>
 </div>
 
-<%= javascript_tag do %>
-  document.addEventListener('DOMContentLoaded', function() {
-    const topicSelect = document.querySelector('.topic-select');
-    const payloadFields = document.querySelectorAll('.payload-fields');
-    
-    topicSelect.addEventListener('change', function() {
-      payloadFields.forEach(field => field.classList.add('d-none'));
+<script>
+  (function() {
+    // Función para actualizar los campos según el tópico seleccionado
+    function updatePayloadFields(topicSelect) {
+      const selectedTopic = topicSelect.value;
+      console.log('Actualizando campos para tópico:', selectedTopic);
       
-      switch(this.value) {
+      // Obtener todos los campos de payload
+      const allPayloadFields = document.querySelectorAll('.payload-fields');
+      
+      // Ocultar todos los campos
+      allPayloadFields.forEach(field => {
+        field.classList.add('d-none');
+      });
+      
+      // Mostrar los campos correspondientes según el tópico
+      let fieldsToShow;
+      switch(selectedTopic) {
         case 'Estado_Casillero':
-          document.querySelector('.locker-state-fields').classList.remove('d-none');
+          fieldsToShow = document.querySelector('.estado-casillero-fields');
           break;
         case 'Cambio_dueno':
-          document.querySelector('.owner-change-fields').classList.remove('d-none');
+          fieldsToShow = document.querySelector('.cambio-dueno-fields');
+          break;
+        case 'actualizar_modelo/envio':
+          fieldsToShow = document.querySelector('.actualizar-modelo-envio-fields');
           break;
         default:
-          document.querySelector('.custom-payload-fields').classList.remove('d-none');
+          fieldsToShow = document.querySelector('.custom-payload-fields');
+          break;
+      }
+      
+      if (fieldsToShow) {
+        fieldsToShow.classList.remove('d-none');
+        console.log('Mostrando campos:', fieldsToShow.className);
+      }
+    }
+
+    // Función de inicialización
+    function initializeMqttForm() {
+      console.log('Inicializando formulario MQTT');
+      
+      const topicSelect = document.querySelector('.topic-select');
+      if (!topicSelect) {
+        console.error('No se encontró el selector de tópicos');
+        return;
+      }
+      
+      // Prevenir inicialización múltiple
+      if (topicSelect.hasAttribute('data-initialized')) {
+        console.log('Formulario ya inicializado');
+        return;
+      }
+      
+      // Marcar como inicializado
+      topicSelect.setAttribute('data-initialized', 'true');
+      
+      // Configurar el manejador de eventos
+      topicSelect.addEventListener('change', function() {
+        updatePayloadFields(this);
+      });
+      
+      // Ejecutar actualización inicial
+      updatePayloadFields(topicSelect);
+      
+      console.log('Inicialización completada');
+    }
+
+    // Función de inicialización con reintento
+    function initializeWithRetry(maxAttempts = 3, delay = 100) {
+      let attempts = 0;
+      
+      function attempt() {
+        attempts++;
+        console.log(`Intento de inicialización ${attempts}`);
+        
+        const topicSelect = document.querySelector('.topic-select');
+        if (topicSelect) {
+          initializeMqttForm();
+        } else if (attempts < maxAttempts) {
+          console.log(`Reintentando en ${delay}ms...`);
+          setTimeout(attempt, delay);
+        } else {
+          console.error('No se pudo inicializar después de múltiples intentos');
+        }
+      }
+      
+      attempt();
+    }
+
+    // Iniciar el proceso de inicialización
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        initializeWithRetry();
+      });
+    } else {
+      initializeWithRetry();
+    }
+
+    // Soporte para Turbolinks si está presente
+    if (typeof Turbolinks !== 'undefined') {
+      document.addEventListener('turbolinks:load', function() {
+        initializeWithRetry();
+      });
+    }
+
+    // Backup final por si todo lo demás falla
+    window.addEventListener('load', function() {
+      const topicSelect = document.querySelector('.topic-select');
+      if (topicSelect && !topicSelect.hasAttribute('data-initialized')) {
+        initializeWithRetry();
       }
     });
-
-    // Agregar manejo del botón limpiar
-    document.getElementById('clear-messages')?.addEventListener('click', function() {
-      document.getElementById('mqtt-messages').innerHTML = '';
-    });
-  });
-<% end %>
+  })();
+</script>

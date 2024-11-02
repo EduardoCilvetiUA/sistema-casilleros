@@ -405,3 +405,22 @@ body.modal-open {
   border-radius: 4px;
   margin-bottom: 1rem;
 }
+
+
+.gesture-symbol {
+  padding: 10px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  background: var(--dark-surface);
+  font-size: 1.5em;
+  color: var(--text-primary);
+  margin: 0 5px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.gesture-sequence {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 8px;
+}

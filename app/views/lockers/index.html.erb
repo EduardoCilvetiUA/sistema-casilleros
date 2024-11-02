@@ -6,9 +6,9 @@
     </div>
     
     <button type="button" 
-      class="btn btn-primary" 
-        data-action="modal#open"
-        data-bs-target="#newLockerModal">
+            class="btn btn-primary" 
+            data-bs-toggle="modal"
+            data-bs-target="#newLockerModal">
       <i class="fas fa-plus me-2"></i>Nuevo Casillero
     </button>
 
@@ -40,8 +40,10 @@
             <button class="btn btn-outline-info btn-sm w-100"
                     data-bs-toggle="modal"
                     data-bs-target="#viewPasswordModal"
-                    data-locker-id="<%= locker.id %>">
-              Ver Contraseña Actual
+                    data-locker-id="<%= locker.id %>"
+                    data-controller-id="<%= @controller.id %>">
+              <i class="fas fa-key me-1"></i>
+              Ver contraseña
             </button>
           </div>
         </div>

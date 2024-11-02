@@ -1,6 +1,6 @@
 class LockersController < ApplicationController
   before_action :set_controller
-  before_action :set_locker, only: [:update_password]
+  before_action :set_locker, only: [:update_password, :password]
 
   def index
     @lockers = @controller.lockers
@@ -80,7 +80,9 @@ class LockersController < ApplicationController
       end
     end
   end
-
+  def password
+    render json: { password: @locker.password }
+  end
   private
 
   def set_controller
