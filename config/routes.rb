@@ -12,11 +12,11 @@ Rails.application.routes.draw do
     resources :controllers do
       resources :lockers do
         member do
-          patch :update_password
           get :password
+          patch :update_password
         end
       end
-    end
+    end    
     
     resources :models do
       resources :gestures, only: [:index, :create, :destroy]

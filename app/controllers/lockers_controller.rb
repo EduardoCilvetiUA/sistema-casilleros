@@ -81,8 +81,30 @@ class LockersController < ApplicationController
     end
   end
   def password
-    render json: { password: @locker.password }
+    # Añadir logs detallados
+    puts "=== DEBUG PASSWORD ==="
+    puts "Locker ID: #{params[:id]}"
+    puts "Controller ID: #{params[:controller_id]}"
+    
+    sequence = @locker.locker_passwords.includes(:gesture).order(:position).map { |lp| lp.gesture.symbol }
+    puts "Sequence: #{sequence.inspect}"
+    
+    # Modificar la respuesta para incluir más información
+    response = {
+      password_sequence: sequence,
+      locker_id: @locker.id,
+      controller_id: @controller.id,
+      timestamp: Time.current
+    }
+    
+    puts "Sending response: #{response.inspect}"
+    puts "===================="
+    
+    render json: response
   end
+  
+  
+    
   private
 
   def set_controller

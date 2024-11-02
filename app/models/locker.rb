@@ -8,7 +8,7 @@ class Locker < ApplicationRecord
   validates :owner_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
 
   # Método para obtener la contraseña del casillero
-  def password
-    locker_passwords.order(:position).map { |lp| lp.gesture.symbol }.join
+  def password_sequence
+    locker_passwords.includes(:gesture).order(:position).map { |lp| lp.gesture.symbol }
   end
 end
