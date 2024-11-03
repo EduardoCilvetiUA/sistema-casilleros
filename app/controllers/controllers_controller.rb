@@ -29,6 +29,6 @@ class ControllersController < ApplicationController
   private
 
   def controller_params
-    params.require(:controller).permit(:name, :location, :model_id)
+    params.require(:controller_model).permit(:name, :location, :model_id)
   end
 end

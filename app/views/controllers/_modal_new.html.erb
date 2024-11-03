@@ -15,6 +15,7 @@
       </div>
       
       <%= form_with(model: @new_controller, 
+                    scope: :controller_model,
                     local: true,
                     data: { action: "submit->modal#submitForm" }) do |f| %>
         <div class="modal-body">
