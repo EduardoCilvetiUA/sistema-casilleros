@@ -5,7 +5,4 @@ default: &default
 
 development:
   <<: *default
-  database: casilleros
-  username: laloc
-  password: postgres  # Asegúrate de que esta línea tenga la nueva contraseña
-  host: localhost
+  url: postgres://sistema_pds_user:oUTvBTFqQR5qVtbDdkqd0HEGO20WJFvW@dpg-csjusrm8ii6s73d8qet0-a.oregon-postgres.render.com/sistema_pds
