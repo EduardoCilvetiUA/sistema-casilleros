@@ -1,8 +1,10 @@
 import "@hotwired/turbo-rails"
-import * as bootstrap from "bootstrap"
 import "controllers"
 
-// Hacer bootstrap disponible globalmente
+// Importar Bootstrap correctamente
+import * as bootstrap from "bootstrap"
+
+// Hacer bootstrap disponible globalmente si es necesario
 window.bootstrap = bootstrap
 
 // Función para limpiar modales

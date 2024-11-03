@@ -1,19 +1,20 @@
 import { Controller } from "@hotwired/stimulus"
+import * as bootstrap from "bootstrap"
 
 export default class extends Controller {
   connect() {
-    // Initialize all dropdowns when the controller connects
-    const dropdownElementList = [this.element]
-    const dropdownList = dropdownElementList.map(dropdownEl => {
-      return new bootstrap.Dropdown(dropdownEl)
-    })
+    console.log("🔌 Dropdown controller connected")
+    // Verificar que bootstrap.Dropdown está disponible
+    if (bootstrap && bootstrap.Dropdown) {
+      this.dropdown = new bootstrap.Dropdown(this.element)
+    } else {
+      console.error("❌ Bootstrap Dropdown no está disponible")
+    }
   }
 
   disconnect() {
-    // Clean up the dropdown when the controller disconnects
-    const dropdown = bootstrap.Dropdown.getInstance(this.element)
-    if (dropdown) {
-      dropdown.dispose()
+    if (this.dropdown) {
+      this.dropdown.dispose()
     }
   }
 }
