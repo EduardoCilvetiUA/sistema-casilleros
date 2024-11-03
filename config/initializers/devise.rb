@@ -320,7 +320,7 @@ Devise.setup do |config|
     access_type: 'offline',
     prompt: 'consent',
     provider_ignores_state: true,
-    redirect_uri: 'https://sistema-pds.onrender.com/users/auth/google_oauth2/callback'
+    redirect_uri: 'https://sistema-casilleros.onrender.com/users/auth/google_oauth2/callback'
   }
 
 end
