@@ -2,7 +2,8 @@
 # exit on error
 set -o errexit
 
-bundle install
-bundle exec rails assets:precompile
-bundle exec rails assets:clean
-bundle exec rails db:migrate
+# Only include production files
+RAILS_ENV=production bundle install
+RAILS_ENV=production bundle exec rails assets:precompile
+RAILS_ENV=production bundle exec rails assets:clean
+RAILS_ENV=production bundle exec rails db:migrate
