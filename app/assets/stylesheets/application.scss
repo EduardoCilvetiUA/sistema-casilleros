@@ -422,3 +422,20 @@ body.modal-open {
   padding: 15px;
   border-radius: 8px;
 }
+
+.broker-config-card {
+  background-color: var(--dark-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  .card-title {
+    color: var(--text-primary);
+  }
+
+  .list-unstyled {
+    color: var(--text-primary);
+  }
+
+  strong {
+    color: var(--text-secondary);
+  }
+}
