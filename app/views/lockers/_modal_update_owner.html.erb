@@ -1,0 +1,27 @@
+<div class="modal fade" 
+     id="updateOwnerModal" 
+     data-controller="locker"
+     data-locker-target="ownerModal"
+     data-action="show.bs.modal->locker#handleOwnerModalShow"
+     tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title">Actualizar Propietario</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="ownerEmail" class="form-label">Correo del nuevo propietario</label>
+          <input type="email" class="form-control" id="ownerEmail" data-locker-target="ownerEmailInput" required>
+        </div>
+      </div>
+      
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" data-action="locker#updateOwner">Actualizar Propietario</button>
+      </div>
+    </div>
+  </div>
+</div>

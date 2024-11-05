@@ -3,7 +3,7 @@ import * as bootstrap from "bootstrap"
 
 // Asegurar que la clase tiene un nombre y es exportada correctamente
 export default class LockerController extends Controller {
-  static targets = ["modal", "container", "sequenceDisplay", "updateButton"]
+  static targets = ["modal", "container", "sequenceDisplay", "updateButton", "ownerModal", "ownerEmailInput"]
   static values = {
     maxLength: { type: Number, default: 4 }
   }
@@ -140,5 +140,43 @@ export default class LockerController extends Controller {
     document.body.appendChild(alertDiv)
     
     setTimeout(() => alertDiv.remove(), 3000)
+  }
+
+  handleOwnerModalShow(event) {
+    const button = event.relatedTarget
+    this.lockerId = button.getAttribute('data-locker-id')
+    this.controllerId = button.getAttribute('data-controller-id')
+    this.ownerEmailInputTarget.value = ''
+  }
+
+  updateOwner(event) {
+    event.preventDefault()
+    const ownerEmail = this.ownerEmailInputTarget.value
+    fetch(`/controllers/${this.controllerId}/lockers/${this.lockerId}/update_owner`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ owner_email: ownerEmail })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          // Close modal and show success notification
+          const modal = bootstrap.Modal.getInstance(this.ownerModalTarget)
+          modal.hide()
+          this.showNotification(data.message, 'success')
+          // Optionally reload the page if necessary
+          location.reload()
+        } else if (data.error) {
+          // Show error notification
+          this.showNotification(data.error, 'error')
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+        this.showNotification('Error al actualizar el propietario', 'error')
+      })
   }
 }

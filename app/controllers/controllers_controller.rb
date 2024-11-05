@@ -160,7 +160,11 @@ class ControllersController < ApplicationController
   private
 
   def set_controller
-    @controller = current_user.controllers.find(params[:id])
+    if current_user.superuser?
+      @controller = Controller.find(params[:id])
+    else
+      @controller = current_user.controllers.find(params[:id])
+    end
   end
 
   def controller_params

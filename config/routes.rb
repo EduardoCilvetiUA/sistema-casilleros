@@ -17,6 +17,7 @@ Rails.application.routes.draw do
         member do
           get :password
           patch :update_password
+          post :update_owner
         end
       end
     end

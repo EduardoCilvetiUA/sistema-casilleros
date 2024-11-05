@@ -89,8 +89,13 @@ class LockersController < ApplicationController
     @locker = @controller.lockers.find(params[:id])
 
     if @locker.update(owner_email: params[:owner_email])
+      # Obtener los gestos actualizados para enviar al MQTT
+      updated_gestures = @locker.locker_passwords.includes(:gesture)
+                               .order(:position)
+                               .map(&:gesture)
+
       # Notificar al controlador físico sobre el cambio de propietario
-      MqttService.publish_owner_change(@locker, @locker.owner_email, @locker.password_sequence)
+      MqttService.publish_owner_change(@locker, @locker.owner_email, updated_gestures)
 
       # Enviar email al nuevo propietario
       LockerMailer.owner_updated(@locker).deliver_later

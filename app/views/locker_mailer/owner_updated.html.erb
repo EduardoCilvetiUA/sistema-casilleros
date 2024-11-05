@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+</head>
+<body>
+  <h1>Propietario de Casillero Actualizado</h1>
+  <p>Estimado usuario,</p>
+  <p>Ahora es el propietario del Casillero #<%= @locker.number %> en el controlador <%= @locker.controller.name %>.</p>
+  <p>La secuencia de gestos para acceder es:</p>
+  <ul>
+    <% @locker_password.each do |gesture_symbol| %>
+      <li><%= gesture_symbol %></li>
+    <% end %>
+  </ul>
+  <p>Por favor, utilice esta secuencia para acceder a su casillero.</p>
+  <p>Gracias por confiar en nuestro servicio.</p>
+</body>
+</html>
