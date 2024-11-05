@@ -10,13 +10,17 @@ Rails.application.routes.draw do
     get 'dashboard', to: 'dashboard#index'
     
     resources :controllers do
+      member do
+        post :sync  # Agregar esta línea
+      end
       resources :lockers do
         member do
           get :password
           patch :update_password
         end
       end
-    end    
+    end
+     
     
     resources :models do
       resources :gestures, only: [:index, :create, :destroy]

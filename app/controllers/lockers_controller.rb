@@ -3,7 +3,11 @@ class LockersController < ApplicationController
   before_action :set_locker, only: [:update_password, :password]
 
   def index
-    @lockers = @controller.lockers
+    @lockers = if current_user.superuser?
+                 @controller.lockers
+               else
+                 @controller.lockers.where(owner_email: current_user.email)
+               end
     @new_locker = Locker.new(controller: @controller)
   end
 
@@ -20,12 +24,6 @@ class LockersController < ApplicationController
         )
       end
       
-      # Notificar al controlador físico sobre el nuevo casillero y su contraseña
-      MqttService.publish_owner_change(@locker, @locker.owner_email, gestures)
-      
-      # Enviar email con la contraseña
-      LockerMailer.password_updated(@locker).deliver_later
-      
       # Registrar el evento de creación
       LockerEvent.create!(
         locker: @locker,
@@ -34,11 +32,17 @@ class LockersController < ApplicationController
         event_time: Time.current
       )
       
-      redirect_to controller_lockers_path(@controller), notice: 'Casillero creado exitosamente'
+      # Notificar al controlador físico y manejar el envío del correo
+      if MqttService.publish_owner_change(@locker, @locker.owner_email, gestures)
+        redirect_to controller_lockers_path(@controller), notice: 'Casillero creado exitosamente'
+      else
+        redirect_to controller_lockers_path(@controller), alert: 'Error al sincronizar el casillero'
+      end
     else
       redirect_to controller_lockers_path(@controller), alert: 'Error al crear el casillero'
     end
   end
+    
 
   def update_password
     gesture_symbols = params[:gesture_sequence]
@@ -80,6 +84,31 @@ class LockersController < ApplicationController
       end
     end
   end
+
+  def update_owner
+    @locker = @controller.lockers.find(params[:id])
+
+    if @locker.update(owner_email: params[:owner_email])
+      # Notificar al controlador físico sobre el cambio de propietario
+      MqttService.publish_owner_change(@locker, @locker.owner_email, @locker.password_sequence)
+
+      # Enviar email al nuevo propietario
+      LockerMailer.owner_updated(@locker).deliver_later
+
+      # Registrar el evento de actualización
+      LockerEvent.create!(
+        locker: @locker,
+        event_type: 'owner_update',
+        success: true,
+        event_time: Time.current
+      )
+
+      render json: { message: "Propietario actualizado exitosamente", locker_id: @locker.id }
+    else
+      render json: { error: "Error al actualizar el propietario" }, status: :unprocessable_entity
+    end
+  end
+
   def password
     # Añadir logs detallados
     puts "=== DEBUG PASSWORD ==="

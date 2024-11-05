@@ -12,8 +12,8 @@ class User < ApplicationRecord
       user.name = auth.info.name
       user.avatar_url = auth.info.image
       
-      # Lista de emails que serán superusuarios
-      admin_emails = ['admin@example.com']
+      # Corregir la lista de emails de administradores
+      admin_emails = ['admin@example.com', 'lalocilveti@gmail.com']
       user.is_superuser = admin_emails.include?(auth.info.email)
     end
   end

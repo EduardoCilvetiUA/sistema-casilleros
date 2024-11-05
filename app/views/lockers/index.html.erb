@@ -3,59 +3,88 @@
     <div>
       <h2>Casilleros - <%= @controller.name %></h2>
       <p class="text-muted"><%= @controller.location %></p>
+      <% unless current_user.superuser? %>
+        <p class="text-info">Mostrando solo tus casilleros asignados</p>
+      <% end %>
     </div>
     
-    <button type="button" 
-            class="btn btn-primary" 
-            data-bs-toggle="modal"
-            data-bs-target="#newLockerModal">
-      <i class="fas fa-plus me-2"></i>Nuevo Casillero
-    </button>
-
+    <% if current_user.superuser? %>
+      <button type="button" 
+              class="btn btn-primary" 
+              data-bs-toggle="modal"
+              data-bs-target="#newLockerModal">
+        <i class="fas fa-plus me-2"></i>Nuevo Casillero
+      </button>
+    <% end %>
   </div>
 
   <div class="row">
-    <% @lockers.each do |locker| %>
-      <div class="col-md-3 mb-4">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-              <h5 class="card-title">Casillero #<%= locker.number %></h5>
-              <span class="badge <%= locker.state ? 'bg-success' : 'bg-secondary' %>">
-                <%= locker.state ? 'Abierto' : 'Cerrado' %>
-              </span>
+    <% if @lockers.any? %>
+      <% @lockers.each do |locker| %>
+        <div class="col-md-3 mb-4">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <h5 class="card-title">Casillero #<%= locker.number %></h5>
+                <span class="badge <%= locker.state ? 'bg-success' : 'bg-secondary' %>">
+                  <%= locker.state ? 'Abierto' : 'Cerrado' %>
+                </span>
+              </div>
+              
+              <p class="card-text">
+                <small class="text-muted">Dueño: <%= locker.owner_email %></small>
+              </p>
+              
+              <button class="btn btn-outline-info btn-sm w-100 mb-2"
+                      data-bs-toggle="modal"
+                      data-bs-target="#viewPasswordModal"
+                      data-locker-id="<%= locker.id %>"
+                      data-controller-id="<%= @controller.id %>">
+                <i class="fas fa-key me-1"></i>
+                Ver contraseña
+              </button>
+
+              <% if current_user.superuser? %>
+                <button class="btn btn-outline-primary btn-sm w-100 mb-2" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#updatePasswordModal"
+                        data-locker-id="<%= locker.id %>"
+                        data-controller-id="<%= @controller.id %>">
+                  Actualizar Contraseña
+                </button>
+                <button class="btn btn-outline-secondary btn-sm w-100 mb-2"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#updateOwnerModal" 
+                        data-locker-id="<%= locker.id %>"
+                        data-controller-id="<%= @controller.id %>">
+                  Actualizar Propietario
+                </button>
+              <% end %>
             </div>
-            
-            <p class="card-text">
-              <small class="text-muted">Dueño: <%= locker.owner_email %></small>
-            </p>
-            
-            <button class="btn btn-outline-primary btn-sm w-100 mb-2" 
-                    data-bs-toggle="modal" 
-                    data-bs-target="#updatePasswordModal"
-                    data-locker-id="<%= locker.id %>"
-                    data-controller-id="<%= @controller.id %>">
-              Actualizar Contraseña
-            </button>
-            <button class="btn btn-outline-info btn-sm w-100"
-                    data-bs-toggle="modal"
-                    data-bs-target="#viewPasswordModal"
-                    data-locker-id="<%= locker.id %>"
-                    data-controller-id="<%= @controller.id %>">
-              <i class="fas fa-key me-1"></i>
-              Ver contraseña
-            </button>
           </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="col-12">
+        <div class="alert alert-info">
+          <% if current_user.superuser? %>
+            No hay casilleros registrados en este controlador.
+          <% else %>
+            No tienes casilleros asignados en este controlador.
+          <% end %>
         </div>
       </div>
     <% end %>
   </div>
 </div>
 
-<!-- Modal para nuevo casillero -->
-<%= render 'lockers/modal_new' %>
-<!-- Modal para actualizar contraseña -->
-<%= render 'lockers/modal_update_password' %>
-<!-- Modal para ver contraseña actual -->
+<% if current_user.superuser? %>
+  <!-- Modales solo visibles para superusuarios -->
+  <%= render 'lockers/modal_new' %>
+  <%= render 'lockers/modal_update_password' %>
+  <%= render 'modal_update_owner' %>
+<% end %>
+
+<!-- Modal visible para todos los usuarios -->
 <%= render 'lockers/modal_view_password' %>
 

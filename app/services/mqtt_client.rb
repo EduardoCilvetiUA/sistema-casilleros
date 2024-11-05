@@ -7,14 +7,49 @@ class MqttClient
   RECONNECT_DELAY = 5
 
   class << self
-    def publish(topic, payload)
-      with_connection do |client|
-        Rails.logger.info "Publicando mensaje en tópico: #{topic}"
-        Rails.logger.info "Payload: #{payload}"
+    def publish(topic, payload, qos: 0, retain: false)
+      Rails.logger.info "Iniciando publicación MQTT - Tópico: #{topic}, QoS: #{qos}"
+      Rails.logger.debug "Payload: #{payload}"
+      
+      begin
+        client = connect
         
-        client.publish(topic, payload, retain: false, qos: 0)
+        if client.connected?
+          Rails.logger.info "Cliente conectado, publicando mensaje..."
+          client.publish(topic, payload, retain: retain, qos: qos)
+          Rails.logger.info "Mensaje publicado exitosamente"
+          true
+        else
+          Rails.logger.error "No se pudo establecer conexión MQTT"
+          false
+        end
+      rescue => e
+        Rails.logger.error "Error en publicación MQTT: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        raise e
+      ensure
+        disconnect(client) if client
+      end
+    end
+
+    def subscribe(topic, &block)
+      Rails.logger.info "Iniciando suscripción MQTT al tópico: #{topic}"
+      
+      begin
+        client = connect
+        client.subscribe(topic => 0)
         
-        Rails.logger.info "Mensaje publicado exitosamente en #{Time.current}"
+        client.get do |t, message|
+          Rails.logger.info "Mensaje recibido - Tópico: #{t}"
+          Rails.logger.debug "Contenido: #{message}"
+          yield(t, message) if block_given?
+        end
+      rescue => e
+        Rails.logger.error "Error en suscripción MQTT: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        raise e
+      ensure
+        disconnect(client) if client
       end
     end
 
@@ -25,44 +60,47 @@ class MqttClient
       false
     end
 
-    def subscribe(topic)
-      loop do
-        begin
-          client = MQTT::Client.new(client_options)
-          client.connect
-          
-          Rails.logger.info "Suscribiendo a tópicos MQTT..."
-          
-          MqttService::TOPICS.values.each do |mqtt_topic|
-            Rails.logger.info "Suscribiendo a: #{mqtt_topic}"
-            client.subscribe(mqtt_topic => 0)
-          end
-          
-          Rails.logger.info "Iniciando bucle de recepción de mensajes..."
-          
-          client.get do |t, message|
-            Rails.logger.info "Mensaje recibido - Tópico: #{t}, Mensaje: #{message}"
-            yield(t, message) if block_given?
-          end
-        rescue => e
-          Rails.logger.error "Error en suscripción MQTT: #{e.message}. Reintentando en #{RECONNECT_DELAY} segundos..."
-          client&.disconnect rescue nil
-          sleep RECONNECT_DELAY
-        end
+    private
+
+    def connect
+      Rails.logger.info "Conectando a broker MQTT..."
+      client = MQTT::Client.new(client_options)
+      
+      Timeout.timeout(TIMEOUT) do
+        client.connect
+        Rails.logger.info "Conexión MQTT establecida"
+      end
+      
+      client
+    rescue Timeout::Error
+      Rails.logger.error "Timeout al conectar con broker MQTT"
+      raise
+    rescue => e
+      Rails.logger.error "Error al conectar con broker MQTT: #{e.message}"
+      raise
+    end
+
+    def disconnect(client)
+      return unless client
+      
+      begin
+        client.disconnect if client.connected?
+        Rails.logger.info "Desconexión MQTT exitosa"
+      rescue => e
+        Rails.logger.error "Error al desconectar cliente MQTT: #{e.message}"
       end
     end
 
-    private
-
     def client_options
       {
-        host: ENV['MQTT_HOST'] || DEFAULT_HOST,
-        port: (ENV['MQTT_PORT'] || DEFAULT_PORT).to_i,
+        host: ENV.fetch('MQTT_HOST', DEFAULT_HOST),
+        port: ENV.fetch('MQTT_PORT', DEFAULT_PORT).to_i,
         ssl: true,
         username: ENV['MQTT_USERNAME'],
         password: ENV['MQTT_PASSWORD'],
-        keep_alive: 120, # Aumentado para mantener la conexión más tiempo
-        client_id: "rails_client_#{Time.now.to_i}" # ID único para cada cliente
+        client_id: "rails_client_#{Time.now.to_i}",
+        keep_alive: 60,
+        clean_session: true
       }
     end
 
@@ -70,22 +108,10 @@ class MqttClient
       client = MQTT::Client.new(client_options)
       
       begin
-        Timeout.timeout(TIMEOUT) do
-          client.connect
-          yield client if block_given?
-        end
-      rescue Timeout::Error => e
-        Rails.logger.error "Timeout en conexión MQTT: #{e.message}"
-        raise
-      rescue => e
-        Rails.logger.error "Error en conexión MQTT: #{e.message}"
-        raise
+        client.connect
+        yield client if block_given?
       ensure
-        begin
-          client.disconnect if client&.connected?
-        rescue => e
-          Rails.logger.error "Error al desconectar cliente MQTT: #{e.message}"
-        end
+        client&.disconnect if client&.connected?
       end
     end
   end

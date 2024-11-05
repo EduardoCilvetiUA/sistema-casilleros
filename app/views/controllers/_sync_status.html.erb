@@ -1,0 +1,22 @@
+<div class="sync-status" data-controller-id="<%= controller.id %>">
+  <div class="d-flex align-items-center">
+    <% if controller.is_connected %>
+      <span class="badge bg-success me-2">
+        <i class="fas fa-check"></i> Conectado
+      </span>
+      <% if controller.last_connection.present? %>
+        <small class="text-muted">
+          Última conexión: <%= time_ago_in_words(controller.last_connection) %> atrás
+        </small>
+      <% else %>
+        <small class="text-muted">
+          Sin registro de última conexión
+        </small>
+      <% end %>
+    <% else %>
+      <span class="badge bg-danger me-2">
+        <i class="fas fa-times"></i> Desconectado
+      </span>
+    <% end %>
+  </div>
+</div>
