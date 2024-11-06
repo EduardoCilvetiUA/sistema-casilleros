@@ -32,12 +32,12 @@ class MqttClient
       end
     end
 
-    def subscribe(topic, &block)
-      Rails.logger.info "Iniciando suscripción MQTT al tópico: #{topic}"
+    def subscribe(topic, qos: 0, &block)
+      Rails.logger.info "Iniciando suscripción MQTT al tópico: #{topic}, QoS: #{qos}"
       
       begin
         client = connect
-        client.subscribe(topic => 0)
+        client.subscribe(topic => qos)
         
         client.get do |t, message|
           Rails.logger.info "Mensaje recibido - Tópico: #{t}"

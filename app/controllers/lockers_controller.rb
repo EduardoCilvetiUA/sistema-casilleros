@@ -87,28 +87,27 @@ class LockersController < ApplicationController
 
   def update_owner
     @locker = @controller.lockers.find(params[:id])
-
+  
     if @locker.update(owner_email: params[:owner_email])
-      # Obtener los gestos actualizados para enviar al MQTT
       updated_gestures = @locker.locker_passwords.includes(:gesture)
                                .order(:position)
                                .map(&:gesture)
-
-      # Notificar al controlador físico sobre el cambio de propietario
-      MqttService.publish_owner_change(@locker, @locker.owner_email, updated_gestures)
-
-      # Enviar email al nuevo propietario
-      LockerMailer.owner_updated(@locker).deliver_later
-
-      # Registrar el evento de actualización
-      LockerEvent.create!(
-        locker: @locker,
-        event_type: 'owner_update',
-        success: true,
-        event_time: Time.current
-      )
-
-      render json: { message: "Propietario actualizado exitosamente", locker_id: @locker.id }
+  
+      if MqttService.publish_owner_change(@locker, @locker.owner_email, updated_gestures)
+        # Send email only here
+        LockerMailer.owner_updated(@locker).deliver_later
+  
+        LockerEvent.create!(
+          locker: @locker,
+          event_type: 'owner_update',
+          success: true,
+          event_time: Time.current
+        )
+  
+        render json: { message: "Propietario actualizado exitosamente", locker_id: @locker.id }
+      else
+        render json: { error: "Error al sincronizar el cambio" }, status: :unprocessable_entity
+      end
     else
       render json: { error: "Error al actualizar el propietario" }, status: :unprocessable_entity
     end

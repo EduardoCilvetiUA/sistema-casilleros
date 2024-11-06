@@ -36,19 +36,16 @@ class MqttService
     end
 
     def start_mqtt_subscriber
-      MqttClient.subscribe('+') do |topic, message|
-        begin
-          # Solo procesar tópicos válidos
-          next unless VALID_TOPICS.include?(topic)
-
-          parsed_message = JSON.parse(message)
-          next unless valid_message?(topic, parsed_message)
-          
-          handle_mqtt_message(topic, parsed_message)
-        rescue JSON::ParserError => e
-          Rails.logger.error "Error al parsear mensaje MQTT (#{topic}): #{e.message}"
-        rescue => e
-          Rails.logger.error "Error procesando mensaje MQTT (#{topic}): #{e.message}"
+      VALID_TOPICS.each do |topic|
+        MqttClient.subscribe(topic, qos: get_topic_qos(topic)) do |t, message|
+          begin
+            parsed_message = JSON.parse(message)
+            next unless valid_message?(t, parsed_message)
+            
+            handle_mqtt_message(t, parsed_message)
+          rescue JSON::ParserError => e
+            Rails.logger.error "Error parsing MQTT message: #{e.message}"
+          end
         end
       end
     end
@@ -70,17 +67,11 @@ class MqttService
         casillero_id: locker.id,
         dueno_nuevo: new_owner,
         clave: password_gestures.map(&:id),
-        tipo: "creacion" # Agregamos tipo para diferenciar creación vs actualización
+        tipo: "creacion"
       }
     
-      success = publish_message(TOPICS[:owner_change], payload, QOS_LEVELS[:important])
-      
-      # Solo enviar el correo si la publicación fue exitosa
-      if success
-        LockerMailer.password_updated(locker).deliver_later
-      end
-      
-      success
+      # Remove the mailer call from here
+      publish_message(TOPICS[:owner_change], payload, QOS_LEVELS[:important])
     end
 
     def publish_model_update_start(controller, model)
@@ -119,6 +110,19 @@ class MqttService
     end
 
     private
+
+    def get_topic_qos(topic)
+      case topic
+      when TOPICS[:model_update_start], TOPICS[:model_update_send],
+           TOPICS[:model_update_receive], TOPICS[:model_update_install]
+        QOS_LEVELS[:critical]
+      when TOPICS[:sync], TOPICS[:owner_change]
+        QOS_LEVELS[:important]
+      else
+        QOS_LEVELS[:standard]
+      end
+    end
+
     def message_processed?(message_id)
       processed_messages.include?(message_id)
     end
