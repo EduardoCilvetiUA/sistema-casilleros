@@ -136,7 +136,7 @@ class MqttService
       Rails.logger.info "Publicando en tópico: #{topic} (QoS: #{qos})"
       
       begin
-        MqttClient.publish(topic, payload.to_json, qos: qos, retain: retain)
+        MqttClient.publish(topic, payload.to_json, qos: qos, retain: false)
         true
       rescue => e
         Rails.logger.error "Error al publicar mensaje MQTT: #{e.message}"

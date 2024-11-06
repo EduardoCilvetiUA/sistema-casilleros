@@ -12,6 +12,11 @@ class LockersController < ApplicationController
   end
 
   def create
+    if @controller.lockers.count >= 4
+      redirect_to controller_lockers_path(@controller), alert: 'El controlador ya tiene el número máximo de casilleros (4).'
+      return
+    end
+
     @locker = @controller.lockers.build(locker_params)
     
     if @locker.save

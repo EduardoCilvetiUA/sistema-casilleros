@@ -95,6 +95,7 @@ end
 puts "Creando casilleros y contraseñas..."
 # Crear casilleros y sus contraseñas
 controllers.each do |controller|
+  # Limitar a 4 casilleros por controlador
   4.times do |i|
     locker = Locker.create!(
       number: i + 1,
