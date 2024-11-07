@@ -12,6 +12,7 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Directorio de trabajo de la aplicación Rails
 WORKDIR /rails
+RUN apt-get update && apt-get install -y libpq-dev
 
 # Instalar paquetes base necesarios para producción
 RUN apt-get update -qq && \
