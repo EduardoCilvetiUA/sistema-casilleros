@@ -24,6 +24,9 @@ services:
         value: production
       - key: RACK_ENV
         value: production
+    buildpacks:
+      - url: heroku/ruby
+      - url: https://github.com/heroku/heroku-buildpack-apt
     packages:
       - libpq-dev
       - postgresql-client

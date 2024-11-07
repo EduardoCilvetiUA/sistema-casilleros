@@ -2,6 +2,9 @@
 # exit on error
 set -o errexit
 
+# Install PostgreSQL client and development libraries
+apt-get update -qq && apt-get install -y postgresql-client libpq-dev
+
 # Clear tmp/cache
 rm -rf tmp/cache/*
 
