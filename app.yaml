@@ -1,0 +1,21 @@
+name: sistema-casilleros
+region: nyc
+services:
+  - name: web
+    environment_slug: ruby
+    instance_size_slug: basic-xxs
+    github:
+      branch: main
+      deploy_on_push: true
+    build_command: ./render-build.sh
+    run_command: bundle exec puma -C config/puma.rb
+    envs:
+      - key: RAILS_MASTER_KEY
+        type: SECRET
+      - key: RAILS_ENV
+        value: production
+      - key: RACK_ENV
+        value: production
+    databases:
+      - name: postgresql
+        engine: PG

@@ -68,7 +68,9 @@ gem 'omniauth-rails_csrf_protection', '~> 0.1.0'
 
 # MQTT
 gem 'mqtt' # Para comunicación con broker
-
+group :production do
+  gem 'pg', '~> 1.4.6'  # Usar una versión específica más estable
+end
 # Para diseño UI
 gem 'bootstrap' # Para el diseño UI
 gem 'sassc-rails'  # Motor Sass para Bootstrap
