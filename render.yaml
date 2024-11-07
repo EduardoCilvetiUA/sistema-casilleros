@@ -9,7 +9,7 @@ services:
     name: mysite
     runtime: ruby
     plan: free
-    buildCommand: "./render-build.sh"
+    buildCommand: "sudo ./render-build.sh"
     startCommand: "bundle exec puma -t 5:5 -p ${PORT:-3000} -e ${RACK_ENV:-production}"
     envVars:
       - key: DATABASE_URL
@@ -26,7 +26,10 @@ services:
         value: production
     buildpacks:
       - url: heroku/ruby
-      - url: https://github.com/heroku/heroku-buildpack-apt
     packages:
       - libpq-dev
       - postgresql-client
+      - postgresql-server-dev-all
+      - lsb-release
+      - wget
+      - gnupg2
