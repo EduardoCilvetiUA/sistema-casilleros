@@ -23,7 +23,8 @@ RUN apt-get update -qq && \
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development test"
+    BUNDLE_WITHOUT="development test" \
+    SECRET_KEY_BASE=""
 
 FROM base AS build
 
@@ -45,7 +46,10 @@ COPY . .
 
 RUN bundle exec bootsnap precompile app/ lib/
 
-RUN SECRET_KEY_BASE_DUMMY=1 RAILS_SKIP_ASSET_COMPILATION_CHECK=true ./bin/rails assets:precompile
+RUN --mount=type=secret,id=master_key \
+    SECRET_KEY_BASE=$(bundle exec rails secret) \
+    RAILS_MASTER_KEY=$(cat /run/secrets/master_key) \
+    ./bin/rails assets:precompile
 
 FROM base
 
