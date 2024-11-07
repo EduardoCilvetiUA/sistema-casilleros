@@ -32,15 +32,17 @@ ENV RAILS_ENV="production" \
 # Fase de construcción para reducir el tamaño de la imagen final
 FROM base AS build
 
-# Instalar paquetes necesarios para compilar gemas
+# Instalar paquetes necesarios para compilar gemas y assets
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
     build-essential \
     git \
-    pkg-config && \
+    pkg-config \
+    nodejs \
+    npm && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Copiar y instalar las gemas de la aplicación
+# Copiar y instalar las gemas de la aplicaci��n
 COPY Gemfile Gemfile.lock ./
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
