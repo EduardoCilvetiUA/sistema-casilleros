@@ -24,3 +24,6 @@ services:
         value: production
       - key: RACK_ENV
         value: production
+    packages:
+      - libpq-dev
+      - postgresql-client
