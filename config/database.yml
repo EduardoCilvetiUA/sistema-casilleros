@@ -9,3 +9,9 @@ development:
   username: laloc
   password: postgres  # Asegúrate de que esta línea tenga la nueva contraseña
   host: localhost
+
+production:
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  url: <%= ENV['DATABASE_URL'] %>
