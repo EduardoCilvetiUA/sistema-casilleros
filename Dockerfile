@@ -21,8 +21,8 @@ ENV RAILS_ENV="production" \
 
 FROM base AS build
 
-# Para la fase de build, usamos una dummy key temporal
-ENV RAILS_MASTER_KEY="dummy_key_for_build"
+# Usamos una key válida de 16 bytes para el build
+ENV RAILS_MASTER_KEY="0123456789abcdef"
 
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
@@ -42,7 +42,7 @@ COPY . .
 
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Compilamos assets con una key temporal
+# Compilamos assets con una key válida temporal
 RUN bundle exec rails assets:precompile
 
 FROM base
