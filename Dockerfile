@@ -46,10 +46,7 @@ COPY . .
 
 RUN bundle exec bootsnap precompile app/ lib/
 
-RUN --mount=type=secret,id=master_key \
-    SECRET_KEY_BASE=$(bundle exec rails secret) \
-    RAILS_MASTER_KEY=$(cat /run/secrets/master_key) \
-    ./bin/rails assets:precompile
+RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 FROM base
 
