@@ -21,6 +21,9 @@ ENV RAILS_ENV="production" \
 
 FROM base AS build
 
+# Agregamos ARG para RAILS_MASTER_KEY
+ARG RAILS_MASTER_KEY
+ENV RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
 
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
@@ -40,11 +43,14 @@ COPY . .
 
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Compilamos assets con una key válida temporal
+# Ahora la compilación de assets usará la RAILS_MASTER_KEY
 RUN bundle exec rails assets:precompile
 
 FROM base
 
+# Necesitamos también la MASTER_KEY en la imagen final
+ARG RAILS_MASTER_KEY
+ENV RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
 
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
