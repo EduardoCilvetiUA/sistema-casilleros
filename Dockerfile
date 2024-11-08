@@ -21,8 +21,6 @@ ENV RAILS_ENV="production" \
 
 FROM base AS build
 
-# Usamos una key válida de 16 bytes para el build
-ENV RAILS_MASTER_KEY="0123456789abcdef"
 
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
@@ -47,7 +45,6 @@ RUN bundle exec rails assets:precompile
 
 FROM base
 
-# No establecemos RAILS_MASTER_KEY aquí - vendrá de Digital Ocean
 
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
