@@ -13,7 +13,7 @@ class User < ApplicationRecord
       user.avatar_url = auth.info.image
 
       # Corregir la lista de emails de administradores
-      admin_emails = [ "admin@example.com", "lalocilveti@gmail.com", "bjmanterola@miuandes.cl" ]
+      admin_emails = [ "admin@example.com", "lalocilveti@gmail.com", "bjmanterola@miuandes.cl","jmolguin@miuandes.cl"  ]
       user.is_superuser = admin_emails.include?(auth.info.email)
     end
   end

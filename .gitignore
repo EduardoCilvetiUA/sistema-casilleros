@@ -34,3 +34,9 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 /config/credentials.yml.enc
+
+# Ignore postgres 
+/config/database.yml
+
+# Ignore file macOS
+.DS_Store 
