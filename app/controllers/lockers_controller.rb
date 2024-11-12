@@ -60,7 +60,7 @@ class LockersController < ApplicationController
                                  .map(&:gesture)
 
         # Notificar al controlador físico sobre el cambio de contraseña
-        if MqttService.publish_password_change(@locker, @locker.owner_email, updated_gestures)
+        if MqttService.publish_password_change(@locker, updated_gestures.map(&:name))
           # Send email only here
           puts "=== DEBUG PASSWORD1 ==="
           LockerMailer.password_updated(@locker).deliver_later

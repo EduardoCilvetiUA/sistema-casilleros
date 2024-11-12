@@ -61,7 +61,7 @@ models = [
 
 puts "Creando gestos..."
 # Gestos para cada modelo
-GESTURE_NAMES = [ 'Abierta', 'Apuntar', 'Cero', 'Chill', 'Perro', 'Rock' ]
+GESTURE_NAMES = [ 'abierta', 'apuntar', 'cero', 'chill', 'perro', 'rock' ]
 GESTURE_SYMBOLS = [ '🖐', '👉', '✊', '👌', '🤙', '🤘' ]
 
 models.each do |model|

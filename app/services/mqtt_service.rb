@@ -2,8 +2,9 @@
 class MqttService
   TOPICS = {
     locker_state: "Estado_Casillero",
+    password_change: "Password_change",
     connection: "Conexion",
-    owner_change: "Cambio_dueno",
+    owner_change: "Owner_change",
     model_update_start: "actualizar_modelo/inicio",
     model_update_send: "actualizar_modelo/envio",
     model_update_receive: "actualizar_modelo/recepcion",
@@ -74,16 +75,15 @@ class MqttService
       publish_message(TOPICS[:owner_change], payload, QOS_LEVELS[:important])
     end
 
-    def publish_password_change(locker, new_password, password_gestures)
+    def publish_password_change(locker, new_password)
       payload = {
         casillero_id: locker.id,
         new_password: new_password,
-        clave: password_gestures.map(&:id),
         tipo: "update"
       }
 
       # Remove the mailer call from here
-      publish_message(TOPICS[:owner_change], payload, QOS_LEVELS[:important])
+      publish_message(TOPICS[:password_change], payload, QOS_LEVELS[:important])
     end
 
     def publish_model_update_start(controller, model)
