@@ -24,7 +24,7 @@ super_user = User.create!(
 )
 
 # Crear usuarios normales
-normal_users = 5.times.map do |i|
+normal_users = 1.times.map do |i|
   User.create!(
     email: "user#{i+1}@example.com",
     password: 'password123',
@@ -61,8 +61,8 @@ models = [
 
 puts "Creando gestos..."
 # Gestos para cada modelo
-GESTURE_NAMES = ['Puño', 'Palma', 'Victoria', 'OK', 'Pulgar Arriba', 'Señalar']
-GESTURE_SYMBOLS = ['👊', '✋', '✌️', '👌', '👍', '👆']
+GESTURE_NAMES = [ 'Abierta', 'Apuntar', 'Cero', 'Chill', 'Perro', 'Rock' ]
+GESTURE_SYMBOLS = [ '🖐', '👉', '✊', '👌', '🤙', '🤘' ]
 
 models.each do |model|
   GESTURE_NAMES.each_with_index do |name, index|
@@ -76,7 +76,7 @@ end
 
 puts "Creando controladores..."
 # Crear controladores
-locations = ['Edificio A', 'Edificio B', 'Edificio C', 'Cafetería', 'Biblioteca']
+locations = [ 'Edificio Ingenieria', 'Edificio Humanidades', 'Edificio Ciencias', 'Cafetería', 'Biblioteca' ]
 controllers = []
 
 normal_users.each_with_index do |user, index|
@@ -86,8 +86,8 @@ normal_users.each_with_index do |user, index|
       location: locations[index],
       user: user,
       model: models.sample,
-      is_connected: [true, false].sample,
-      last_connection: [Time.current, 15.minutes.ago, 1.hour.ago].sample
+      is_connected: [ true, false ].sample,
+      last_connection: [ Time.current, 15.minutes.ago, 1.hour.ago ].sample
     )
   end
 end
@@ -99,7 +99,7 @@ controllers.each do |controller|
   4.times do |i|
     locker = Locker.create!(
       number: i + 1,
-      state: [true, false].sample,
+      state: [ true, false ].sample,
       owner_email: "cliente#{controller.id}_#{i+1}@example.com",
       controller: controller
     )
@@ -119,8 +119,8 @@ controllers.each do |controller|
       event_date = rand(30.days).seconds.ago
       LockerEvent.create!(
         locker: locker,
-        event_type: ['open', 'close', 'password_attempt'].sample,
-        success: [true, true, true, false].sample, # 75% de éxito
+        event_type: [ 'open', 'close', 'password_attempt' ].sample,
+        success: [ true, true, true, false ].sample, # 75% de éxito
         event_time: event_date,
         created_at: event_date,
         updated_at: event_date
@@ -135,14 +135,14 @@ controllers.each do |controller|
   3.times do
     start_date = rand(30.days).seconds.ago
     completed_date = start_date + rand(30.minutes)
-    status = ['completed', 'failed', 'pending', 'in_progress'].sample
-    
+    status = [ 'completed', 'failed', 'pending', 'in_progress' ].sample
+
     ModelUpdate.create!(
       controller: controller,
       model: models.sample,
       status: status,
       started_at: start_date,
-      completed_at: ['completed', 'failed'].include?(status) ? completed_date : nil,
+      completed_at: [ 'completed', 'failed' ].include?(status) ? completed_date : nil,
       created_at: start_date,
       updated_at: completed_date
     )

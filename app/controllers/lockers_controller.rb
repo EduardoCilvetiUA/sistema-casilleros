@@ -1,24 +1,24 @@
 class LockersController < ApplicationController
   before_action :set_controller
-  before_action :set_locker, only: [:update_password, :password]
+  before_action :set_locker, only: [ :update_password, :password ]
 
   def index
     @lockers = if current_user.superuser?
                  @controller.lockers
-               else
+    else
                  @controller.lockers.where(owner_email: current_user.email)
-               end
+    end
     @new_locker = Locker.new(controller: @controller)
   end
 
   def create
     if @controller.lockers.count >= 4
-      redirect_to controller_lockers_path(@controller), alert: 'El controlador ya tiene el número máximo de casilleros (4).'
+      redirect_to controller_lockers_path(@controller), alert: "El controlador ya tiene el número máximo de casilleros (4)."
       return
     end
 
     @locker = @controller.lockers.build(locker_params)
-    
+
     if @locker.save
       # Crear contraseña inicial aleatoria
       gestures = @controller.model.gestures.sample(4)
@@ -28,26 +28,26 @@ class LockersController < ApplicationController
           position: position
         )
       end
-      
+
       # Registrar el evento de creación
       LockerEvent.create!(
         locker: @locker,
-        event_type: 'creation',
+        event_type: "creation",
         success: true,
         event_time: Time.current
       )
-      
+
       # Notificar al controlador físico y manejar el envío del correo
       if MqttService.publish_owner_change(@locker, @locker.owner_email, gestures)
-        redirect_to controller_lockers_path(@controller), notice: 'Casillero creado exitosamente'
+        redirect_to controller_lockers_path(@controller), notice: "Casillero creado exitosamente"
       else
-        redirect_to controller_lockers_path(@controller), alert: 'Error al sincronizar el casillero'
+        redirect_to controller_lockers_path(@controller), alert: "Error al sincronizar el casillero"
       end
     else
-      redirect_to controller_lockers_path(@controller), alert: 'Error al crear el casillero'
+      redirect_to controller_lockers_path(@controller), alert: "Error al crear el casillero"
     end
   end
-    
+
 
   def update_password
     gesture_symbols = params[:gesture_sequence]
@@ -60,55 +60,47 @@ class LockersController < ApplicationController
                                  .map(&:gesture)
 
         # Notificar al controlador físico sobre el cambio de contraseña
-        MqttService.publish_owner_change(@locker, @locker.owner_email, updated_gestures)
-        
-        # Registrar el evento de actualización
-        LockerEvent.create!(
-          locker: @locker,
-          event_type: 'password_update',
-          success: true,
-          event_time: Time.current
-        )
-
-        render json: { 
-          message: "Contraseña actualizada exitosamente",
-          locker_id: @locker.id
-        }
+        if MqttService.publish_password_change(@locker, @locker.owner_email, updated_gestures)
+          # Send email only here
+          puts "=== DEBUG PASSWORD1 ==="
+          LockerMailer.password_updated(@locker).deliver_later
+          puts "=== DEBUG PASSWORD2 ==="
+          LockerEvent.create!(
+            locker: @locker,
+            event_type: "password_update",
+            success: true,
+            event_time: Time.current
+          )
+          puts "=== DEBUG PASSWORD3 ==="
+          render json: { message: "Contraseña actualizada exitosamente" }
+        else
+          render json: { error: "Error al sincronizar el cambio" }, status: :unprocessable_entity
+        end
       else
-        # Registrar el evento fallido
-        LockerEvent.create!(
-          locker: @locker,
-          event_type: 'password_update',
-          success: false,
-          event_time: Time.current
-        )
-
-        render json: { 
-          error: "Error al actualizar la contraseña"
-        }, status: :unprocessable_entity
+        render json: { error: "Error al actualizar el la contraseña" }, status: :unprocessable_entity
       end
     end
   end
 
   def update_owner
     @locker = @controller.lockers.find(params[:id])
-  
+
     if @locker.update(owner_email: params[:owner_email])
       updated_gestures = @locker.locker_passwords.includes(:gesture)
                                .order(:position)
                                .map(&:gesture)
-  
+
       if MqttService.publish_owner_change(@locker, @locker.owner_email, updated_gestures)
         # Send email only here
         LockerMailer.owner_updated(@locker).deliver_later
-  
+
         LockerEvent.create!(
           locker: @locker,
-          event_type: 'owner_update',
+          event_type: "owner_update",
           success: true,
           event_time: Time.current
         )
-  
+
         render json: { message: "Propietario actualizado exitosamente", locker_id: @locker.id }
       else
         render json: { error: "Error al sincronizar el cambio" }, status: :unprocessable_entity
@@ -123,10 +115,10 @@ class LockersController < ApplicationController
     puts "=== DEBUG PASSWORD ==="
     puts "Locker ID: #{params[:id]}"
     puts "Controller ID: #{params[:controller_id]}"
-    
+
     sequence = @locker.locker_passwords.includes(:gesture).order(:position).map { |lp| lp.gesture.symbol }
     puts "Sequence: #{sequence.inspect}"
-    
+
     # Modificar la respuesta para incluir más información
     response = {
       password_sequence: sequence,
@@ -134,15 +126,15 @@ class LockersController < ApplicationController
       controller_id: @controller.id,
       timestamp: Time.current
     }
-    
+
     puts "Sending response: #{response.inspect}"
     puts "===================="
-    
+
     render json: response
   end
-  
-  
-    
+
+
+
   private
 
   def set_controller

@@ -6,5 +6,5 @@ class LockerEvent < ApplicationRecord
 
   scope :successful, -> { where(success: true) }
   scope :failed, -> { where(success: false) }
-  scope :recent, -> { where('event_time > ?', 24.hours.ago) }
+  scope :recent, -> { where("event_time > ?", 24.hours.ago) }
 end

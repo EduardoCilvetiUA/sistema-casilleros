@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: 'eacilveti@miuandes.cl'
-  layout 'mailer'
+  default from: '"Sistema de Casilleros" <eacilveti@miuandes.cl>'
+  layout "mailer"
 end

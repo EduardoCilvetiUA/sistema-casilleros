@@ -85,20 +85,20 @@ export default class LockerController extends Controller {
     }
   }
 
-  updatePassword(event) {
-    event.preventDefault()
-    console.log("💾 Updating password")
-    
+  updatePassword() {
     if (!this.lockerId || !this.controllerId) {
       console.error("Missing IDs")
       return
     }
-
+  
     if (this.currentSequence.length !== this.maxLengthValue) {
       console.error("Incomplete sequence")
       return
     }
-
+  
+    // Deshabilitar el botón para prevenir múltiples clics
+    this.updateButtonTarget.disabled = true
+  
     fetch(`/controllers/${this.controllerId}/lockers/${this.lockerId}/update_password`, {
       method: 'PATCH',
       headers: {
@@ -113,7 +113,6 @@ export default class LockerController extends Controller {
     .then(data => {
       if (data.message) {
         this.showNotification(data.message, 'success')
-        // Asegurarse de que el modal se cierra correctamente
         if (this.modalTarget) {
           const modal = bootstrap.Modal.getInstance(this.modalTarget)
           if (modal) {
@@ -125,6 +124,10 @@ export default class LockerController extends Controller {
     .catch(error => {
       console.error("Error:", error)
       this.showNotification('Error al actualizar la contraseña', 'error')
+    })
+    .finally(() => {
+      // Habilitar el botón nuevamente
+      this.updateButtonTarget.disabled = false
     })
   }
 

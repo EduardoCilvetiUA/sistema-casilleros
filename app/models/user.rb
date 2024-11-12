@@ -1,7 +1,7 @@
 class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
-         :omniauthable, omniauth_providers: [:google_oauth2]
+         :omniauthable, omniauth_providers: [ :google_oauth2 ]
 
   has_many :controllers
 
@@ -11,9 +11,9 @@ class User < ApplicationRecord
       user.password = Devise.friendly_token[0, 20]
       user.name = auth.info.name
       user.avatar_url = auth.info.image
-      
+
       # Corregir la lista de emails de administradores
-      admin_emails = ['admin@example.com', 'lalocilveti@gmail.com']
+      admin_emails = [ "admin@example.com", "lalocilveti@gmail.com", "bjmanterola@miuandes.cl" ]
       user.is_superuser = admin_emails.include?(auth.info.email)
     end
   end

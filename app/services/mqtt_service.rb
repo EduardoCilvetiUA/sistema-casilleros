@@ -41,7 +41,7 @@ class MqttService
           begin
             parsed_message = JSON.parse(message)
             next unless valid_message?(t, parsed_message)
-            
+
             handle_mqtt_message(t, parsed_message)
           rescue JSON::ParserError => e
             Rails.logger.error "Error parsing MQTT message: #{e.message}"
@@ -69,7 +69,19 @@ class MqttService
         clave: password_gestures.map(&:id),
         tipo: "creacion"
       }
-    
+
+      # Remove the mailer call from here
+      publish_message(TOPICS[:owner_change], payload, QOS_LEVELS[:important])
+    end
+
+    def publish_password_change(locker, new_password, password_gestures)
+      payload = {
+        casillero_id: locker.id,
+        new_password: new_password,
+        clave: password_gestures.map(&:id),
+        tipo: "update"
+      }
+
       # Remove the mailer call from here
       publish_message(TOPICS[:owner_change], payload, QOS_LEVELS[:important])
     end
@@ -87,7 +99,7 @@ class MqttService
 
     def publish_sync_request(controller)
       Rails.logger.info "Iniciando solicitud de sincronización para controlador #{controller.id}"
-      
+
       payload = {
         controlador_id: controller.id,
         timestamp: Time.current.iso8601,
@@ -98,7 +110,7 @@ class MqttService
       }
 
       success = publish_message(TOPICS[:sync], payload, QOS_LEVELS[:important])
-      
+
       if success
         controller.update_connection_status(true)
         Rails.logger.info "Solicitud de sincronización enviada exitosamente"
@@ -126,7 +138,7 @@ class MqttService
     def message_processed?(message_id)
       processed_messages.include?(message_id)
     end
-  
+
     def mark_message_processed(message_id)
       processed_messages.add(message_id)
       # Limpiar mensajes antiguos después de cierto tiempo
@@ -134,7 +146,7 @@ class MqttService
     end
     def publish_message(topic, payload, qos, retain: false)
       Rails.logger.info "Publicando en tópico: #{topic} (QoS: #{qos})"
-      
+
       begin
         MqttClient.publish(topic, payload.to_json, qos: qos, retain: false)
         true
@@ -183,10 +195,10 @@ class MqttService
       rescue => e
         Rails.logger.error "Error procesando mensaje MQTT: #{e.message}"
     end
-    
+
     def handle_sync_response(data)
       return unless data["controlador_id"]
-      
+
       controller = Controller.find_by(id: data["controlador_id"])
       return unless controller
 
@@ -204,7 +216,7 @@ class MqttService
 
     def handle_locker_state(data)
       return unless data["casillero_id"]
-      
+
       locker = Locker.find_by(id: data["casillero_id"])
       return unless locker
 
@@ -214,7 +226,7 @@ class MqttService
 
     def handle_connection_status(data)
       return unless data["controlador_id"]
-      
+
       controller = Controller.find_by(id: data["controlador_id"])
       return unless controller
 
@@ -229,7 +241,7 @@ class MqttService
         controller_id: data["controlador_id"],
         model_id: data["modelo_id"]
       )
-      
+
       return unless update
 
       update.update(
@@ -242,7 +254,7 @@ class MqttService
         controller_id: data["controlador_id"],
         model_id: data["modelo_id"]
       )
-      
+
       return unless update
 
       if data["estado"] == "instalado"
@@ -254,7 +266,7 @@ class MqttService
 
     def broadcast_message(topic, message)
       ActionCable.server.broadcast(
-        'mqtt_messages_channel',
+        "mqtt_messages_channel",
         {
           topic: topic,
           message: message.to_json,
@@ -266,22 +278,22 @@ class MqttService
     end
     def handle_owner_change(data)
       return unless data["casillero_id"]
-      
+
       locker = Locker.find_by(id: data["casillero_id"])
       return unless locker
-    
+
       # No procesar si es el mensaje que nosotros mismos enviamos
       return if data["tipo"] == "creacion"
-    
+
       begin
         # Registrar el evento
         LockerEvent.create!(
           locker: locker,
-          event_type: 'owner_change',
+          event_type: "owner_change",
           success: true,
           event_time: Time.current
         )
-    
+
         broadcast_message(TOPICS[:owner_change], {
           casillero_id: locker.id,
           status: "actualizado",
@@ -291,6 +303,6 @@ class MqttService
         Rails.logger.error "Error procesando cambio de dueño: #{e.message}"
         Rails.logger.error e.backtrace.join("\n")
       end
-    end     
+    end
   end
 end
