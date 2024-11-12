@@ -16,4 +16,14 @@ class LockerMailer < ApplicationMailer
       subject: "Propietario de Casillero Actualizado"
     )
   end
+  def status_notification(locker, status)
+    @locker = locker
+    @status = status
+    @user_email = locker.owner_email
+
+    mail(
+      to: @user_email,
+      subject: "Notificación de estado de tu casillero"
+    )
+  end
 end

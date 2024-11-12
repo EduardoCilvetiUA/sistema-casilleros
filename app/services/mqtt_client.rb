@@ -37,8 +37,18 @@ class MqttClient
       
       begin
         client = connect
-        client.subscribe(topic => qos)
         
+        # Subscribe to topics
+        if topic.is_a?(Array)
+          topic_hash = topic.map { |t| [t, qos] }.to_h
+          client.subscribe(topic_hash)
+          Rails.logger.info "Suscrito a múltiples tópicos: #{topic.join(', ')}"
+        else
+          client.subscribe(topic => qos)
+          Rails.logger.info "Suscrito al tópico: #{topic}"
+        end
+
+        # Start message loop
         client.get do |t, message|
           Rails.logger.info "Mensaje recibido - Tópico: #{t}"
           Rails.logger.debug "Contenido: #{message}"

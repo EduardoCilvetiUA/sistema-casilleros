@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  <style>
+    .container {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .status-box {
+      padding: 15px;
+      border-radius: 5px;
+      background-color: #e9ecef;
+      margin-bottom: 20px;
+    }
+    .footer {
+      font-size: 12px;
+      color: #6c757d;
+      margin-top: 30px;
+      border-top: 1px solid #dee2e6;
+      padding-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Notificación de Estado de Casillero</h2>
+    </div>
+
+    <div class="status-box">
+      <p>Estimado(a) usuario,</p>
+      
+      <p>Le informamos que su casillero ha registrado el siguiente estado:</p>
+      
+      <ul>
+        <li><strong>Casillero ID:</strong> <%= @locker.id %></li>
+        <li><strong>Estado:</strong> <%= @status.humanize %></li>
+        <li><strong>Fecha y Hora:</strong> <%= Time.current.strftime("%d/%m/%Y %H:%M:%S") %></li>
+      </ul>
+    </div>
+
+    <p>Si usted no reconoce esta actividad, por favor contacte con el administrador del sistema inmediatamente.</p>
+
+    <div class="footer">
+      <p>Este es un mensaje automático, por favor no responda a este correo.</p>
+      <p>Sistema de Casilleros Inteligentes</p>
+    </div>
+  </div>
+</body>
+</html>

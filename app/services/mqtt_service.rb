@@ -9,8 +9,15 @@ class MqttService
     model_update_send: "actualizar_modelo/envio",
     model_update_receive: "actualizar_modelo/recepcion",
     model_update_install: "actualizar_modelo/instalacion",
-    sync: "sincronizacion"
+    sync: "sincronizacion",
+    status_locker: "status_locker"  # New topic
   }.freeze
+
+  SUBSCRIPTION_TOPICS = [
+    TOPICS[:locker_state],
+    TOPICS[:connection],
+    TOPICS[:status_locker]
+  ].freeze
 
   QOS_LEVELS = {
     critical: 2,    # Para actualizaciones de modelo
@@ -37,16 +44,15 @@ class MqttService
     end
 
     def start_mqtt_subscriber
-      VALID_TOPICS.each do |topic|
-        MqttClient.subscribe(topic, qos: get_topic_qos(topic)) do |t, message|
-          begin
-            parsed_message = JSON.parse(message)
-            next unless valid_message?(t, parsed_message)
+      # Subscribe to all topics at once with a single connection
+      MqttClient.subscribe(SUBSCRIPTION_TOPICS, qos: QOS_LEVELS[:standard]) do |topic, message|
+        begin
+          parsed_message = JSON.parse(message)
+          next unless valid_message?(topic, parsed_message)
 
-            handle_mqtt_message(t, parsed_message)
-          rescue JSON::ParserError => e
-            Rails.logger.error "Error parsing MQTT message: #{e.message}"
-          end
+          handle_mqtt_message(topic, parsed_message)
+        rescue JSON::ParserError => e
+          Rails.logger.error "Error parsing MQTT message: #{e.message}"
         end
       end
     end
@@ -162,6 +168,8 @@ class MqttService
         %w[casillero_id estado controlador_id].all? { |key| message.key?(key) }
       when TOPICS[:connection]
         %w[controlador_id estado].all? { |key| message.key?(key) }
+      when TOPICS[:status_locker]
+        %w[locker_id status].all? { |key| message.key?(key) }
       when TOPICS[:owner_change]
         required_keys = %w[casillero_id dueno_nuevo clave]
         required_keys.all? { |key| message.key?(key) }
@@ -191,6 +199,8 @@ class MqttService
         handle_model_update_reception(message)
       when TOPICS[:model_update_install]
         handle_model_update_installation(message)
+      when TOPICS[:status_locker]
+        handle_locker_status(message)
       end
       rescue => e
         Rails.logger.error "Error procesando mensaje MQTT: #{e.message}"
@@ -303,6 +313,22 @@ class MqttService
         Rails.logger.error "Error procesando cambio de dueño: #{e.message}"
         Rails.logger.error e.backtrace.join("\n")
       end
+    end
+
+    def handle_locker_status(data)
+      locker = Locker.find_by(id: data["locker_id"])
+      return unless locker && locker.owner_email.present?
+
+      # Send email to locker owner
+      LockerMailer.status_notification(locker, data["status"]).deliver_later
+
+      broadcast_message(TOPICS[:status_locker], {
+        locker_id: locker.id,
+        status: data["status"],
+        timestamp: Time.current.iso8601
+      })
+    rescue => e
+      Rails.logger.error "Error handling locker status: #{e.message}"
     end
   end
 end
