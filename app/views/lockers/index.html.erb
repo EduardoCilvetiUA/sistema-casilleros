@@ -3,19 +3,14 @@
     <div>
       <h2>Casilleros - <%= @controller.name %></h2>
       <p class="text-muted"><%= @controller.location %></p>
-      <% unless current_user.superuser? %>
-        <p class="text-info">Mostrando solo tus casilleros asignados</p>
-      <% end %>
     </div>
     
-    <% if current_user.superuser? %>
-      <button type="button" 
-              class="btn btn-primary" 
-              data-bs-toggle="modal"
-              data-bs-target="#newLockerModal">
-        <i class="fas fa-plus me-2"></i>Nuevo Casillero
-      </button>
-    <% end %>
+    <button type="button" 
+            class="btn btn-primary" 
+            data-bs-toggle="modal"
+            data-bs-target="#newLockerModal">
+      <i class="fas fa-plus me-2"></i>Nuevo Casillero
+    </button>
   </div>
 
   <div class="row">
@@ -44,22 +39,20 @@
                 Ver contraseña
               </button>
 
-              <% if current_user.superuser? %>
-                <button class="btn btn-outline-primary btn-sm w-100 mb-2" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#updatePasswordModal"
-                        data-locker-id="<%= locker.id %>"
-                        data-controller-id="<%= @controller.id %>">
-                  Actualizar Contraseña
-                </button>
-                <button class="btn btn-outline-secondary btn-sm w-100 mb-2"
-                        data-bs-toggle="modal" 
-                        data-bs-target="#updateOwnerModal" 
-                        data-locker-id="<%= locker.id %>"
-                        data-controller-id="<%= @controller.id %>">
-                  Actualizar Propietario
-                </button>
-              <% end %>
+              <button class="btn btn-outline-primary btn-sm w-100 mb-2" 
+                      data-bs-toggle="modal" 
+                      data-bs-target="#updatePasswordModal"
+                      data-locker-id="<%= locker.id %>"
+                      data-controller-id="<%= @controller.id %>">
+                Actualizar Contraseña
+              </button>
+              <button class="btn btn-outline-secondary btn-sm w-100 mb-2"
+                      data-bs-toggle="modal" 
+                      data-bs-target="#updateOwnerModal" 
+                      data-locker-id="<%= locker.id %>"
+                      data-controller-id="<%= @controller.id %>">
+                Actualizar Propietario
+              </button>
             </div>
           </div>
         </div>
@@ -67,24 +60,13 @@
     <% else %>
       <div class="col-12">
         <div class="alert alert-info">
-          <% if current_user.superuser? %>
-            No hay casilleros registrados en este controlador.
-          <% else %>
-            No tienes casilleros asignados en este controlador.
-          <% end %>
         </div>
       </div>
     <% end %>
   </div>
 </div>
 
-<% if current_user.superuser? %>
-  <!-- Modales solo visibles para superusuarios -->
-  <%= render 'lockers/modal_new' %>
-  <%= render 'lockers/modal_update_password' %>
-  <%= render 'lockers/modal_update_owner' %>
-<% end %>
-
-<!-- Modal visible para todos los usuarios -->
+<%= render 'lockers/modal_new' %>
+<%= render 'lockers/modal_update_password' %>
+<%= render 'lockers/modal_update_owner' %>
 <%= render 'lockers/modal_view_password' %>
-

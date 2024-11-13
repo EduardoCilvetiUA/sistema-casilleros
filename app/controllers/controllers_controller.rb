@@ -4,11 +4,7 @@ class ControllersController < ApplicationController
   before_action :set_controller, only: [ :update, :destroy, :sync ] # Removemos :edit
 
   def index
-    @controllers = if current_user.superuser?
-                    Controller.all
-    else
-                    current_user.controllers
-    end
+    @controllers =Controller.all
     @new_controller = Controller.new
   end
 

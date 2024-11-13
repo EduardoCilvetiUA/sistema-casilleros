@@ -3,11 +3,7 @@ class LockersController < ApplicationController
   before_action :set_locker, only: [ :update_password, :password ]
 
   def index
-    @lockers = if current_user.superuser?
-                 @controller.lockers
-    else
-                 @controller.lockers.where(owner_email: current_user.email)
-    end
+    @lockers = @controller.lockers
     @new_locker = Locker.new(controller: @controller)
   end
 
