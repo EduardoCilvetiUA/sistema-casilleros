@@ -14,7 +14,10 @@ Devise.setup do |config|
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
-  # config.secret_key = '55ba7f3ae4686d039a537519b3efee7843f175f1e6714bad670d41dd0a5d693e8e174ab39d85c39cec5e64727f4a991b4f70c636f05ceede6c6585dad7fe001c'
+  config.secret_key = Rails.application.credentials.secret_key_base[0..15]
+
+  # Si prefieres usar una clave específica para Devise, puedes usar esto en su lugar:
+  # config.secret_key = Rails.application.credentials.devise_secret_key
 
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.
@@ -320,7 +323,7 @@ Devise.setup do |config|
     access_type: 'offline',
     prompt: 'consent',
     provider_ignores_state: true,
-    redirect_uri: 'http://localhost:3000/users/auth/google_oauth2/callback'
+    redirect_uri: 'https://plankton-app-viibg.ondigitalocean.app/users/auth/google_oauth2/callback'
   }
 
 end
