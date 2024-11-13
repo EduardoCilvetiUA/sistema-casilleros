@@ -10,13 +10,15 @@ class MqttService
     model_update_receive: "actualizar_modelo/recepcion",
     model_update_install: "actualizar_modelo/instalacion",
     sync: "sincronizacion",
-    status_locker: "status_locker"  # New topic
+    status_locker: "status_locker",  # New topic
+    subscription_receiver: "subscription_receiver"  # New topic
   }.freeze
 
   SUBSCRIPTION_TOPICS = [
     TOPICS[:locker_state],
     TOPICS[:connection],
-    TOPICS[:status_locker]
+    TOPICS[:status_locker],
+    TOPICS[:subscription_receiver]
   ].freeze
 
   QOS_LEVELS = {
@@ -177,6 +179,8 @@ class MqttService
         %w[controlador_id tipo].all? { |key| message.key?(key) }
       when TOPICS[:model_update_start], TOPICS[:model_update_send]
         %w[controlador_id modelo_id].all? { |key| message.key?(key) }
+      when TOPICS[:subscription_receiver]
+        %w[casillero_id].all? { |key| message.key?(key) }
       else
         false
       end
@@ -201,6 +205,8 @@ class MqttService
         handle_model_update_installation(message)
       when TOPICS[:status_locker]
         handle_locker_status(message)
+      when TOPICS[:subscription_receiver]
+        handle_subscription_receiver(message)
       end
       rescue => e
         Rails.logger.error "Error procesando mensaje MQTT: #{e.message}"
@@ -329,6 +335,25 @@ class MqttService
       })
     rescue => e
       Rails.logger.error "Error handling locker status: #{e.message}"
+    end
+
+    def handle_subscription_receiver(data)
+      return unless data["casillero_id"]
+
+      locker = Locker.find_by(id: data["casillero_id"])
+      return unless locker
+
+      # Notify the user about the password change confirmation
+      ActionCable.server.broadcast(
+        "mqtt_messages_channel",
+        {
+          topic: TOPICS[:subscription_receiver],
+          message: data.to_json,
+          received_at: Time.current
+        }
+      )
+    rescue => e
+      Rails.logger.error "Error handling subscription receiver: #{e.message}"
     end
   end
 end

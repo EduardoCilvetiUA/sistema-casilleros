@@ -24,4 +24,11 @@ class LockerPasswordService
   rescue ActiveRecord::RecordInvalid
     false
   end
+  def self.save_password(locker, gesture_symbols)
+    locker.locker_passwords.destroy_all
+    gesture_symbols.each_with_index do |symbol, index|
+      gesture = Gesture.find_by(symbol: symbol)
+      locker.locker_passwords.create!(gesture: gesture, position: index)
+    end
+  end
 end

@@ -48,33 +48,58 @@ class LockersController < ApplicationController
   def update_password
     gesture_symbols = params[:gesture_sequence]
 
-    ActiveRecord::Base.transaction do
-      if LockerPasswordService.update_password(@locker, gesture_symbols)
-        # Obtener los gestos actualizados para enviar al MQTT
-        updated_gestures = @locker.locker_passwords.includes(:gesture)
-                                 .order(:position)
-                                 .map(&:gesture)
+    # Obtener los gestos actualizados para enviar al MQTT
+    updated_gestures = @locker.locker_passwords.includes(:gesture)
+                             .order(:position)
+                             .map(&:gesture)
 
-        # Notificar al controlador físico sobre el cambio de contraseña
-        if MqttService.publish_password_change(@locker, updated_gestures.map(&:name))
-          # Send email only here
-          puts "=== DEBUG PASSWORD1 ==="
-          LockerMailer.password_updated(@locker).deliver_later
-          puts "=== DEBUG PASSWORD2 ==="
-          LockerEvent.create!(
-            locker: @locker,
-            event_type: "password_update",
-            success: true,
-            event_time: Time.current
-          )
-          puts "=== DEBUG PASSWORD3 ==="
-          render json: { message: "Contraseña actualizada exitosamente" }
-        else
-          render json: { error: "Error al sincronizar el cambio" }, status: :unprocessable_entity
+    # Notificar al controlador físico sobre el cambio de contraseña
+    if MqttService.publish_password_change(@locker, updated_gestures.map(&:name))
+      begin
+        # Wait for confirmation from subscription_receiver with a timeout of 20 seconds
+        Timeout.timeout(20) do
+          MqttClient.subscribe([MqttService::TOPICS[:subscription_receiver]]) do |topic, message|
+            Rails.logger.info "Mensaje recibido - Tópico: #{topic}"
+            Rails.logger.info "Contenido: #{message}"
+
+            begin
+              # Ensure the message is properly encoded to UTF-8
+              message.force_encoding('UTF-8')
+              data = JSON.parse(message.gsub('“', '"').gsub('”', '"'))
+              if data["casillero_id"] == @locker.id
+                # Save the password in the database
+                ActiveRecord::Base.transaction do
+                  LockerPasswordService.update_password(@locker, gesture_symbols)
+
+                  # Send email only here
+                  LockerMailer.password_updated(@locker).deliver_later
+
+                  LockerEvent.create!(
+                    locker: @locker,
+                    event_type: "password_update",
+                    success: true,
+                    event_time: Time.current
+                  )
+                end
+
+                render json: { message: "Contraseña actualizada exitosamente" }
+                return
+              end
+            rescue JSON::ParserError => e
+              Rails.logger.error "Error parsing MQTT message: #{e.message}"
+              render json: { error: "Error al procesar la respuesta del dispositivo" }, status: :unprocessable_entity
+            rescue Encoding::CompatibilityError => e
+              Rails.logger.error "Encoding error: #{e.message}"
+              render json: { error: "Error de codificación al procesar la respuesta del dispositivo" }, status: :unprocessable_entity
+            end
+          end
         end
-      else
-        render json: { error: "Error al actualizar el la contraseña" }, status: :unprocessable_entity
+      rescue Timeout::Error
+        Rails.logger.error "Timeout esperando confirmación de cambio de contraseña"
+        render json: { error: "Timeout esperando confirmación de cambio de contraseña" }, status: :request_timeout
       end
+    else
+      render json: { error: "Error al sincronizar el cambio" }, status: :unprocessable_entity
     end
   end
 
