@@ -58,6 +58,9 @@ COPY --from=build /rails /rails
 COPY ./bin/docker-entrypoint /rails/bin/docker-entrypoint
 RUN chmod +x /rails/bin/docker-entrypoint
 
+# Ensure ./bin/rails has executable permissions
+RUN chmod +x /rails/bin/rails
+
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
     chown -R rails:rails /rails/db /rails/log /rails/storage /rails/tmp
