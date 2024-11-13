@@ -48,13 +48,13 @@ class LockersController < ApplicationController
   def update_password
     gesture_symbols = params[:gesture_sequence]
 
-    # Obtener los gestos actualizados para enviar al MQTT
-    updated_gestures = @locker.locker_passwords.includes(:gesture)
-                             .order(:position)
-                             .map(&:gesture)
+    # Convert gesture symbols to gesture names
+    updated_gestures = gesture_symbols.map do |symbol|
+      Gesture.find_by(symbol: symbol).name
+    end
 
     # Notificar al controlador físico sobre el cambio de contraseña
-    if MqttService.publish_password_change(@locker, updated_gestures.map(&:name))
+    if MqttService.publish_password_change(@locker, updated_gestures)
       begin
         # Wait for confirmation from subscription_receiver with a timeout of 20 seconds
         Timeout.timeout(20) do
