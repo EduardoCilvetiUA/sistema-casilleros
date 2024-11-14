@@ -31,7 +31,7 @@ class MqttService
 
   class << self
     def processed_messages
-      @processed_messages ||= Set.new
+      @processed_messages ||= {}
     end
 
     def publish_connection_test(controller)
@@ -144,14 +144,16 @@ class MqttService
     end
 
     def message_processed?(message_id)
-      processed_messages.include?(message_id)
+      false
     end
 
-    def mark_message_processed(message_id)
-      processed_messages.add(message_id)
-      # Limpiar mensajes antiguos después de cierto tiempo
-      processed_messages.clear if processed_messages.size > 1000
+    def mark_message_processed(message_id, time)
+      processed_messages[message_id] = time  # Usar el método processed_messages en lugar de @processed_messages
+      
+      # Limpiar mensajes antiguos
+      processed_messages.delete_if { |_, processed_time| Time.current - processed_time > 1.hour }
     end
+    
     def publish_message(topic, payload, qos, retain: false)
       Rails.logger.info "Publicando en tópico: #{topic} (QoS: #{qos})"
 
@@ -188,8 +190,16 @@ class MqttService
 
     def handle_mqtt_message(topic, message)
       message_id = "#{topic}-#{message.hash}"
-      return if message_processed?(message_id)
-      mark_message_processed(message_id)
+      current_time = Time.current
+      
+      # Solo procesar si el mensaje no ha sido procesado en los últimos X segundos
+      if recently_processed?(message_id)
+        Rails.logger.info "Mensaje recibido pero ignorado por ser muy reciente: #{message}"
+        return
+      end
+      
+      mark_message_processed(message_id, current_time)
+      
       case topic
       when TOPICS[:sync]
         handle_sync_response(message)
@@ -211,7 +221,14 @@ class MqttService
       rescue => e
         Rails.logger.error "Error procesando mensaje MQTT: #{e.message}"
     end
-
+    def recently_processed?(message_id)
+      last_processed = processed_messages[message_id]  # Usar el método processed_messages en lugar de @processed_messages
+      return false if last_processed.nil?
+      
+      # Definir ventana de tiempo (por ejemplo, 5 segundos)
+      Time.current - last_processed < 5.seconds
+    end
+  
     def handle_sync_response(data)
       return unless data["controlador_id"]
 
@@ -323,11 +340,20 @@ class MqttService
 
     def handle_locker_status(data)
       locker = Locker.find_by(id: data["locker_id"])
-      return unless locker && locker.owner_email.present?
-
+      
+      if locker.nil?
+        Rails.logger.warn "No se encontró el casillero con ID: #{data["locker_id"]}"
+        return
+      end
+      
+      if locker.owner_email.blank?
+        Rails.logger.warn "Casillero #{data["locker_id"]} no tiene email de propietario configurado"
+        return
+      end
+    
       # Send email to locker owner
       LockerMailer.status_notification(locker, data["status"]).deliver_later
-
+      
       broadcast_message(TOPICS[:status_locker], {
         locker_id: locker.id,
         status: data["status"],
@@ -335,8 +361,8 @@ class MqttService
       })
     rescue => e
       Rails.logger.error "Error handling locker status: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
     end
-
     def handle_subscription_receiver(data)
       return unless data["casillero_id"]
 
