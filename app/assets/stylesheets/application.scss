@@ -439,3 +439,38 @@ body.modal-open {
     color: var(--text-secondary);
   }
 }
+
+/* Metrics Styling */
+.stats-summary {
+  color: var(--text-primary);
+  
+  strong {
+    color: var(--accent);
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  ul li {
+    color: var(--text-primary);
+  }
+}
+
+.metrics-card {
+  height: 100%;
+  
+  .card-body {
+    display: flex;
+    flex-direction: column;
+
+    .list-unstyled {
+      li {
+        color: var(--text-primary);
+        
+        strong {
+          color: var(--accent);
+          margin-bottom: 0.25rem;
+        }
+      }
+    }
+  }
+}

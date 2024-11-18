@@ -354,6 +354,18 @@ class MqttService
       # Send email to locker owner
       LockerMailer.status_notification(locker, data["status"]).deliver_later
       
+      if data["status"] == 'open'
+        locker.update(state: true)
+        LockerEvent.create!(
+          locker: locker,
+          event_type: 'open',
+          success: true,
+          event_time: Time.current
+        )
+      elsif data["status"] == 'closed'
+        locker.update(state: false)
+      end
+      
       broadcast_message(TOPICS[:status_locker], {
         locker_id: locker.id,
         status: data["status"],

@@ -3,20 +3,19 @@
 
   <div class="row mb-4">
     <div class="col-md-8">
-      <div class="card">
+      <div class="card metrics-card">
         <div class="card-body">
           <h5 class="card-title">Uso de Casilleros - Últimos 7 días</h5>
-          <%= column_chart @usage_data, 
-              ytitle: "Porcentaje de uso",
-              suffix: "%",
-              colors: ["#4e73df"] %>
+          <div class="chart-container">
+            <canvas id="usageChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
     
     <div class="col-md-4">
-      <div class="card">
-        <div class="card-body">
+      <div class="card metrics-card">
+        <div class="card-body stats-summary">
           <h5 class="card-title">Resumen</h5>
           <ul class="list-unstyled">
             <li class="mb-3">
@@ -39,21 +38,112 @@
 
   <div class="row">
     <div class="col-md-6 mb-4">
-      <div class="card">
+      <div class="card metrics-card">
         <div class="card-body">
           <h5 class="card-title">Gestos más utilizados</h5>
-          <%= pie_chart @gesture_stats %>
+          <div class="chart-container">
+            <canvas id="gestureChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
     
     <div class="col-md-6 mb-4">
-      <div class="card">
+      <div class="card metrics-card">
         <div class="card-body">
           <h5 class="card-title">Intentos fallidos por casillero</h5>
-          <%= bar_chart @failed_attempts %>
+          <div class="chart-container">
+            <canvas id="failedAttemptsChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<% content_for :javascript do %>
+  <script>
+    function initCharts() {
+      // Configuración común para los gráficos
+      Chart.defaults.color = '#ffffff';
+      Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.1)';
+
+      // Usage Chart
+      new Chart(document.getElementById('usageChart'), {
+        type: 'bar',
+        data: {
+          labels: <%= raw @usage_data.keys %>,
+          datasets: [{
+            label: 'Porcentaje de uso',
+            data: <%= raw @usage_data.values %>,
+            backgroundColor: '#4e73df'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Porcentaje de uso',
+                color: '#ffffff'
+              }
+            }
+          }
+        }
+      });
+
+      // Gesture Chart
+      new Chart(document.getElementById('gestureChart'), {
+        type: 'pie',
+        data: {
+          labels: <%= raw @gesture_stats.keys %>,
+          datasets: [{
+            data: <%= raw @gesture_stats.values %>,
+            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      // Failed Attempts Chart
+      new Chart(document.getElementById('failedAttemptsChart'), {
+        type: 'bar',
+        data: {
+          labels: <%= raw @failed_attempts.keys.map { |n| "Casillero #{n}" } %>,
+          datasets: [{
+            label: 'Intentos fallidos',
+            data: <%= raw @failed_attempts.values %>,
+            backgroundColor: '#e74a3b'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Asegurarse de que Chart.js esté cargado antes de inicializar
+    if (typeof Chart !== 'undefined') {
+      initCharts();
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initCharts, 100);
+      });
+    }
+  </script>
+<% end %>
