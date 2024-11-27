@@ -323,7 +323,7 @@ Devise.setup do |config|
     access_type: 'offline',
     prompt: 'consent',
     provider_ignores_state: true,
-    redirect_uri: 'https://plankton-app-viibg.ondigitalocean.app/users/auth/google_oauth2/callback'
+    redirect_uri: 'http://locahost:3000/users/auth/google_oauth2/callback'
   }
 
 end
