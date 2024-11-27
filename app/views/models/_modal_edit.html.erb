@@ -1,20 +1,19 @@
 <div class="modal fade" 
-     id="newModelModal" 
+     id="editModelModal_<%= model.id %>" 
      tabindex="-1"
      data-controller="modal">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Nuevo Modelo de IA</h5>
+        <h5 class="modal-title">Editar Modelo de IA</h5>
         <button type="button" 
                 class="btn-close" 
                 data-bs-dismiss="modal" 
                 aria-label="Close"></button>
       </div>
       
-      <%= form_with(model: @new_model, 
-                    local: true, 
-                    multipart: true,
+      <%= form_with(model: model, 
+                    local: true,
                     data: { 
                       action: "submit->modal#submitForm"
                     }) do |f| %>
@@ -24,18 +23,6 @@
             <%= f.text_field :name, class: 'form-control', required: true %>
           </div>
           
-          <div class="mb-3">
-          <%= f.label :file_path, 'Archivo del Modelo', class: 'form-label' %>
-          <%= f.file_field :file_path, 
-                           class: 'form-control', 
-                           accept: '.h5,.tflite', 
-                           required: true,
-                           data: { 
-                             max_size: 5.megabytes 
-                           } %>
-            <small class="text-muted">Tamaño máximo: 5MB. Formatos permitidos: .h5, .tflite</small>
-          </div>
-
           <div class="mb-3">
             <div class="form-check">
               <%= f.check_box :active, 
@@ -48,27 +35,28 @@
 
           <div class="gestures-section">
             <h6 class="mb-3">Gestos del Modelo</h6>
-            
             <div class="gestures-container">
               <%= f.fields_for :gestures do |gesture_form| %>
                 <div class="gesture-input-group mb-3">
                   <div class="row">
                     <div class="col">
                       <%= gesture_form.text_field :name, 
-                            placeholder: "Nombre del gesto",
-                            class: 'form-control',
-                            required: true %>
+                          placeholder: "Nombre del gesto",
+                          class: 'form-control',
+                          required: true %>
                     </div>
                     <div class="col">
                       <%= gesture_form.select :symbol, 
-                            options_for_select(['👍', '👎', '👊', '✊', '🤛', '🫷', '🤞', '✌', '🫰', '🤟', '🤘', '👌', '🤌', '🤏', '🫳', '🫴', '👈', '👆', '👇', '☝', '✋', '🖐', '🖖', '🤙', '🫲', '🫵']), 
-                            { prompt: 'Selecciona un símbolo' },
-                            class: 'form-control',
-                            required: true %>
+                          options_for_select(['👍', '👎', '👊', '✊', '🤛', '🫷', '🤞', '✌', '🫰', '🤟', '🤘', '👌', '🤌', '🤏', '🫳', '🫴', '👈', '👆', '👇', '☝', '✋', '🖐', '🖖', '🤙', '🫲', '🫵'], 
+                          gesture_form.object.symbol), 
+                          { prompt: 'Selecciona un símbolo' }, 
+                          class: 'form-control',
+                          required: true %>
                     </div>
                   </div>
                 </div>
               <% end %>
+            </div>
           </div>
         </div>
         
@@ -76,26 +64,9 @@
           <button type="button" 
                   class="btn btn-secondary" 
                   data-bs-dismiss="modal">Cancelar</button>
-          <%= f.submit 'Crear Modelo', class: 'btn btn-primary' %>
+          <%= f.submit 'Actualizar Modelo', class: 'btn btn-primary' %>
         </div>
       <% end %>
     </div>
   </div>
 </div>
-
-<% content_for :javascript do %>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const fileInput = document.querySelector('input[type="file"]');
-      const maxSize = parseInt(fileInput.dataset.maxSize);
-
-      fileInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file.size > maxSize) {
-          alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
-          this.value = '';
-        }
-      });
-    });
-  </script>
-<% end %>

@@ -29,9 +29,22 @@
             </p>
             
             <div class="d-flex gap-2">
-              <%= link_to 'Ver Gestos', model_gestures_path(model), class: 'btn btn-outline-primary btn-sm' %>
-              <% if current_user&.is_superuser %>
-                <%= link_to 'Editar', edit_model_path(model), class: 'btn btn-outline-secondary btn-sm' %>
+              <button class="btn btn-outline-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#viewGesturesModal"
+                  data-model-id="<%= model.id %>">
+            <i class="fas fa-hand-peace me-2"></i>
+            Ver Gestos
+          </button>
+            <button type="button" class='btn btn-outline-secondary btn-sm' data-bs-toggle="modal" data-bs-target="#editModelModal_<%= model.id %>">
+              <i class="fas fa-plus me-2"></i>Editar
+            </button>
+            <%= button_to model_path(model), 
+              method: :delete,
+              class: 'btn btn-outline-danger',
+              form: { style: 'display: inline-block' },
+              data: { turbo_confirm: '¿Estás seguro de que quieres eliminar este modelo?' } do %>
+              <i class="fas fa-trash me-2"></i>Eliminar
               <% end %>
             </div>
           </div>
@@ -40,4 +53,9 @@
     <% end %>
   </div>
 </div>
+
+<%= render 'models/modal_view_gestures' %>
+<% @models.each do |model| %>
+    <%= render 'models/modal_edit', model: model %>
+  <% end %>
 <%= render 'models/modal_new' if current_user&.is_superuser %>

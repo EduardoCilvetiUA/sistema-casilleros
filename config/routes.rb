@@ -24,7 +24,9 @@ Rails.application.routes.draw do
      
     
     resources :models do
-      resources :gestures, only: [:index, :create, :destroy]
+      member do
+        get :gestos
+      end
     end
     
     namespace :metrics do

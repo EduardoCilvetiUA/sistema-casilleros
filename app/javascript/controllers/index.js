@@ -3,6 +3,7 @@ import { application } from "./application"
 // Import controllers
 import LockerController from "./locker_controller.js"
 import PasswordViewerController from "./password_viewer_controller.js"
+import GesturesViewerController from "./gestures_viewer_controller.js"
 import DropdownController from "./dropdown_controller.js"
 import ModalController from "./modal_controller.js"
 
@@ -29,6 +30,13 @@ try {
   console.log("✅ PasswordViewer controller registered successfully")
 } catch (error) {
   console.error("❌ Error registering PasswordViewer controller:", error)
+}
+
+try {
+  application.register("gestures-viewer", GesturesViewerController)
+  console.log("✅ GesturesViewer controller registered successfully")
+} catch (error) {
+  console.error("❌ Error registering GesturesViewer controller:", error)
 }
 
 try {

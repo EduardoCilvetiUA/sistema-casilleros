@@ -1,0 +1,37 @@
+<div class="modal fade" 
+     id="viewGesturesModal" 
+     data-controller="gestures-viewer"
+     data-action="show.bs.modal->gestures-viewer#handleModalShow"
+     tabindex="-1" 
+     aria-labelledby="viewGesturesModalLabel" 
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title">
+          <i class="fas fa-key me-2"></i>Gestos del modelo
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="text-center">
+          <div class="gesture-sequence mb-3" 
+               data-gestures-viewer-target="sequence">
+          </div>
+          <small class="text-muted">
+            Estos son los gestos que el modelo ha aprendido.
+          </small>
+        </div>
+      </div>
+      
+      <div class="modal-footer border-secondary">
+        <button type="button" 
+                class="btn btn-outline-light" 
+                data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
