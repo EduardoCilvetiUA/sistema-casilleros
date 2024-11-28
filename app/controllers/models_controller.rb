@@ -113,7 +113,7 @@ class ModelsController < ApplicationController
     params.require(:model).permit(
     :name,
     :active,
-    :file_path,
+    :file,
     :size_bytes,
     gestures_attributes: [ :id, :name, :symbol, :_destroy ]
   )

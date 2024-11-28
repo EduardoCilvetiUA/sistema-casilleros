@@ -24,17 +24,15 @@
             <%= f.text_field :name, class: 'form-control', required: true %>
           </div>
           
-          <div class="mb-3">
-          <%= f.label :file_path, 'Archivo del Modelo', class: 'form-label' %>
-          <%= f.file_field :file_path, 
-                           class: 'form-control', 
-                           accept: '.h5,.tflite', 
-                           required: true,
-                           data: { 
-                             max_size: 5.megabytes 
-                           } %>
-            <small class="text-muted">Tamaño máximo: 5MB. Formatos permitidos: .h5, .tflite</small>
-          </div>
+        <div class="mb-3">
+          <%= f.label :file, 'Archivo del Modelo (.cc)', class: 'form-label' %>
+          <%= f.file_field :file, 
+                          class: 'form-control', 
+                          accept: '.cc', 
+                          required: true %>
+          <small class="text-muted">Tamaño máximo: 15MB. Formatos permitidos: .cc</small>
+        </div>
+
 
           <div class="mb-3">
             <div class="form-check">
@@ -82,20 +80,3 @@
     </div>
   </div>
 </div>
-
-<% content_for :javascript do %>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const fileInput = document.querySelector('input[type="file"]');
-      const maxSize = parseInt(fileInput.dataset.maxSize);
-
-      fileInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file.size > maxSize) {
-          alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
-          this.value = '';
-        }
-      });
-    });
-  </script>
-<% end %>

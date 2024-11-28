@@ -37,27 +37,46 @@ normal_users = 1.times.map do |i|
 end
 
 puts "Creando modelos de IA..."
-# Crear modelos de IA
+# Crear modelos de IA con archivos adjuntos
 models = [
   {
     name: "Modelo Básico v1",
     active: false,
-    file_path: "/models/basic_v1.h5",
-    size_bytes: 500000
+    size_bytes: 500000,
+    file_content: "Contenido del modelo básico v1"
   },
   {
     name: "Modelo Estándar v2",
     active: true,
-    file_path: "/models/standard_v2.h5",
-    size_bytes: 750000
+    size_bytes: 750000,
+    file_content: "Contenido del modelo estándar v2"
   },
   {
     name: "Modelo Premium v3",
     active: true,
-    file_path: "/models/premium_v3.h5",
-    size_bytes: 1000000
+    size_bytes: 1000000,
+    file_content: "Contenido del modelo premium v3"
   }
-].map { |model_data| Model.create!(model_data) }
+].map do |model_data|
+  file_content = model_data.delete(:file_content)
+  model = Model.new(model_data)
+  
+  # Crear un archivo temporal y adjuntarlo al modelo
+  temp_file = Tempfile.new(['model', '.h5'])
+  temp_file.write(file_content)
+  temp_file.rewind
+  
+  model.file.attach(
+    io: temp_file,
+    filename: "#{model_data[:name].parameterize}.h5",
+    content_type: 'application/octet-stream'
+  )
+  
+  model.save!
+  temp_file.close
+  temp_file.unlink
+  model
+end
 
 puts "Creando gestos..."
 # Gestos para cada modelo
@@ -76,7 +95,7 @@ end
 
 puts "Creando controladores..."
 # Crear controladores
-locations = [ 'Edificio Ingenieria', 'Edificio Humanidades', 'Edificio Ciencias', 'Cafetería', 'Biblioteca' ]
+locations = ['Edificio Ingenieria', 'Edificio Humanidades', 'Edificio Ciencias', 'Cafetería', 'Biblioteca']
 controllers = []
 
 normal_users.each_with_index do |user, index|
@@ -86,8 +105,8 @@ normal_users.each_with_index do |user, index|
       location: locations[index],
       user: user,
       model: models.sample,
-      is_connected: [ true, false ].sample,
-      last_connection: [ Time.current, 15.minutes.ago, 1.hour.ago ].sample
+      is_connected: [true, false].sample,
+      last_connection: [Time.current, 15.minutes.ago, 1.hour.ago].sample
     )
   end
 end
@@ -99,7 +118,7 @@ controllers.each do |controller|
   4.times do |i|
     locker = Locker.create!(
       number: i + 1,
-      state: [ true, false ].sample,
+      state: [true, false].sample,
       owner_email: "cliente#{controller.id}_#{i+1}@example.com",
       controller: controller
     )
@@ -119,8 +138,8 @@ controllers.each do |controller|
       event_date = rand(30.days).seconds.ago
       LockerEvent.create!(
         locker: locker,
-        event_type: [ 'open', 'close', 'password_attempt' ].sample,
-        success: [ true, true, true, false ].sample, # 75% de éxito
+        event_type: ['open', 'close', 'password_attempt'].sample,
+        success: [true, true, true, false].sample, # 75% de éxito
         event_time: event_date,
         created_at: event_date,
         updated_at: event_date
@@ -135,14 +154,14 @@ controllers.each do |controller|
   3.times do
     start_date = rand(30.days).seconds.ago
     completed_date = start_date + rand(30.minutes)
-    status = [ 'completed', 'failed', 'pending', 'in_progress' ].sample
+    status = ['completed', 'failed', 'pending', 'in_progress'].sample
 
     ModelUpdate.create!(
       controller: controller,
       model: models.sample,
       status: status,
       started_at: start_date,
-      completed_at: [ 'completed', 'failed' ].include?(status) ? completed_date : nil,
+      completed_at: ['completed', 'failed'].include?(status) ? completed_date : nil,
       created_at: start_date,
       updated_at: completed_date
     )
