@@ -59,6 +59,30 @@
       </div>
     </div>
   </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card metrics-card">
+        <div class="card-body">
+          <h5 class="card-title">Patrones de Uso por Hora</h5>
+          <div class="chart-container">
+            <canvas id="hourlyPatternChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <div class="card metrics-card">
+        <div class="card-body">
+          <h5 class="card-title">Duración de Accesos</h5>
+          <div class="chart-container">
+            <canvas id="accessDurationChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <% content_for :javascript do %>
@@ -131,6 +155,50 @@
               ticks: {
                 stepSize: 1
               }
+            }
+          }
+        }
+      });
+
+      // Hourly Pattern Chart
+      new Chart(document.getElementById('hourlyPatternChart'), {
+        type: 'bar',
+        data: {
+          labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+          datasets: [{
+            label: 'Frecuencia de uso',
+            data: <%= raw @hourly_pattern.values %>,
+            backgroundColor: '#36b9cc'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      // Access Duration Chart
+      new Chart(document.getElementById('accessDurationChart'), {
+        type: 'bar',
+        data: {
+          labels: <%= raw @access_duration.keys %>,
+          datasets: [{
+            label: 'Cantidad de accesos',
+            data: <%= raw @access_duration.values %>,
+            backgroundColor: '#1cc88a'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
             }
           }
         }

@@ -1,9 +1,10 @@
 class MetricsController < ApplicationController
   def usage_stats
-    # Calculate last 7 days stats
     @usage_data = calculate_weekly_usage
     @gesture_stats = calculate_gesture_stats
     @failed_attempts = calculate_failed_attempts
+    @hourly_pattern = calculate_hourly_pattern
+    @access_duration = calculate_access_duration
     
     # Calculate summary stats
     usage_by_day = @usage_data.values
@@ -38,5 +39,28 @@ class MetricsController < ApplicationController
                .joins(:locker)
                .group('lockers.number')
                .count
+  end
+
+  def calculate_hourly_pattern
+    LockerEvent.where(
+      event_time: 7.days.ago..Time.current
+    ).group_by_hour_of_day(:event_time).count
+  end
+
+  def calculate_access_duration
+    events = LockerEvent.where(
+      event_type: ['open', 'close'],
+      event_time: 7.days.ago..Time.current
+    ).order(:event_time)
+    
+    durations = []
+    events.each_slice(2) do |open, close|
+      next unless close && open.event_type == 'open' && close.event_type == 'close'
+      durations << ((close.event_time - open.event_time) / 60).round
+    end
+    
+    durations.group_by { |d| d / 15 * 15 }
+            .transform_keys { |k| "#{k}-#{k + 15} min" }
+            .transform_values(&:count)
   end
 end
