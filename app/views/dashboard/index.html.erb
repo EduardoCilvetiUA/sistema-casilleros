@@ -46,4 +46,138 @@
       </div>
     </div>
   </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card stats-card">
+        <div class="card-body">
+          <h5 class="card-title">Aperturas Diarias</h5>
+          <div class="chart-container">
+            <canvas id="dailyOpeningsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <div class="card stats-card">
+        <div class="card-body">
+          <h5 class="card-title">Estado de Controladores</h5>
+          <div class="chart-container">
+            <canvas id="controllerStatusChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card stats-card">
+        <div class="card-body">
+          <h5 class="card-title">Actividad por Hora</h5>
+          <div class="chart-container">
+            <canvas id="hourlyActivityChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <div class="card stats-card">
+        <div class="card-body">
+          <h5 class="card-title">Éxito vs Fallos</h5>
+          <div class="chart-container">
+            <canvas id="accessRatioChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<%= content_for :javascript do %>
+  <script>
+    function initCharts() {
+      // Daily Openings Chart
+      new Chart(document.getElementById('dailyOpeningsChart'), {
+        type: 'line',
+        data: {
+          labels: <%= raw @daily_openings.keys.map(&:strftime).map { |d| d[5..9].gsub('-', '/') } %>,
+          datasets: [{
+            label: 'Aperturas',
+            data: <%= raw @daily_openings.values %>,
+            borderColor: '#4e73df',
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      // Controller Status Chart
+      new Chart(document.getElementById('controllerStatusChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Conectados', 'Desconectados'],
+          datasets: [{
+            data: [
+              <%= @controller_status[true] || 0 %>,
+              <%= @controller_status[false] || 0 %>
+            ],
+            backgroundColor: ['#1cc88a', '#e74a3b']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      // Hourly Activity Chart
+      const hourLabels = [];
+      for (let i = 0; i < 24; i++) {
+        hourLabels.push(i.toString().padStart(2, '0') + ':00');
+      }
+      
+      new Chart(document.getElementById('hourlyActivityChart'), {
+        type: 'bar',
+        data: {
+          labels: hourLabels,
+          datasets: [{
+            label: 'Actividad',
+            data: <%= raw Array.new(24) { |i| @hourly_activity[i] || 0 } %>,
+            backgroundColor: '#36b9cc'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      // Access Ratio Chart
+      new Chart(document.getElementById('accessRatioChart'), {
+        type: 'pie',
+        data: {
+          labels: ['Exitosos', 'Fallidos'],
+          datasets: [{
+            data: [
+              <%= @access_ratio[true] || 0 %>,
+              <%= @access_ratio[false] || 0 %>
+            ],
+            backgroundColor: ['#1cc88a', '#e74a3b']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initCharts);
+  </script>
+<% end %>
