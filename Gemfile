@@ -37,7 +37,7 @@ gem "bootsnap", require: false
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
-  gem 'rspec-rails'
+  gem "rspec-rails"
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 
@@ -48,7 +48,7 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
-  gem 'error_highlight'
+  gem "error_highlight"
 end
 
 group :test do
@@ -58,23 +58,23 @@ group :test do
 end
 
 # Autenticación
-gem 'devise' # Para autenticación
-gem 'omniauth'
-gem 'omniauth-google-oauth2' # Para login con Google
-gem 'omniauth-rails_csrf_protection', '~> 0.1.0'
+gem "devise" # Para autenticación
+gem "omniauth"
+gem "omniauth-google-oauth2" # Para login con Google
+gem "omniauth-rails_csrf_protection", "~> 0.1.0"
 
 # MQTT
-gem 'mqtt' # Para comunicación con broker
+gem "mqtt" # Para comunicación con broker
 
 # Para diseño UI
-gem 'bootstrap' # Para el diseño UI
-gem 'sassc-rails'  # Motor Sass para Bootstrap
-gem 'popper_js'
+gem "bootstrap" # Para el diseño UI
+gem "sassc-rails"  # Motor Sass para Bootstrap
+gem "popper_js"
 
 
-gem 'pg'  # Para PostgreSQL
+gem "pg"  # Para PostgreSQL
 
 
-gem 'chartkick'
-gem 'groupdate'
-gem 'dotenv-rails'
+gem "chartkick"
+gem "groupdate"
+gem "dotenv-rails"

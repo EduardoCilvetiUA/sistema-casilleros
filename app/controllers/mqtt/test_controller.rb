@@ -12,10 +12,10 @@ class Mqtt::TestController < ApplicationController
       model_update_receive: "actualizar_modelo/recepcion",
       model_update_install: "actualizar_modelo/instalacion"
     }
-    
+
     @mqtt_status = {
-      host: ENV['MQTT_HOST'] || MqttClient::DEFAULT_HOST,
-      port: ENV['MQTT_PORT'] || MqttClient::DEFAULT_PORT,
+      host: ENV["MQTT_HOST"] || MqttClient::DEFAULT_HOST,
+      port: ENV["MQTT_PORT"] || MqttClient::DEFAULT_PORT,
       connected: false,
       error: nil
     }
@@ -28,10 +28,9 @@ class Mqtt::TestController < ApplicationController
   end
 
   def publish
-    
     topic = params[:topic]
     payload = build_payload
-    
+
     begin
       raise "Tópico no seleccionado" if topic.blank?
       raise "Payload inválido" if payload.nil?
@@ -64,7 +63,7 @@ class Mqtt::TestController < ApplicationController
       }
     when "actualizar_modelo/envio"
       {
-        gesture_ids: params[:gesture_ids].split(',').map(&:strip)
+        gesture_ids: params[:gesture_ids].split(",").map(&:strip)
       }
     else
       # For custom or other topics, use custom_payload if provided

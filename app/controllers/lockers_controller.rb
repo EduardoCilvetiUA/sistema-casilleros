@@ -58,14 +58,14 @@ class LockersController < ApplicationController
       begin
         # Wait for confirmation from subscription_receiver with a timeout of 20 seconds
         Timeout.timeout(20) do
-          MqttClient.subscribe([MqttService::TOPICS[:subscription_receiver]]) do |topic, message|
+          MqttClient.subscribe([ MqttService::TOPICS[:subscription_receiver] ]) do |topic, message|
             Rails.logger.info "Mensaje recibido - Tópico: #{topic}"
             Rails.logger.info "Contenido: #{message}"
 
             begin
               # Ensure the message is properly encoded to UTF-8
-              message.force_encoding('UTF-8')
-              data = JSON.parse(message.gsub('“', '"').gsub('”', '"'))
+              message.force_encoding("UTF-8")
+              data = JSON.parse(message.gsub("“", '"').gsub("”", '"'))
               if data["casillero_id"] == @locker.id
                 # Save the password in the database
                 ActiveRecord::Base.transaction do
