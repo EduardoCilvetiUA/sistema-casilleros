@@ -4,6 +4,7 @@ class User < ApplicationRecord
          :omniauthable, omniauth_providers: [ :google_oauth2 ]
 
   has_many :controllers
+  has_many :models, dependent: :destroy
 
   def self.from_omniauth(auth)
     where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
@@ -13,7 +14,7 @@ class User < ApplicationRecord
       user.avatar_url = auth.info.image
 
       # Corregir la lista de emails de administradores
-      admin_emails = [ "admin@example.com", "lalocilveti@gmail.com", "bjmanterola@miuandes.cl","jmolguin@miuandes.cl"  ]
+      admin_emails = [ "admin@example.com", "lalocilveti@gmail.com", "bjmanterola@miuandes.cl", "jmolguin@miuandes.cl"  ]
       user.is_superuser = admin_emails.include?(auth.info.email)
     end
   end

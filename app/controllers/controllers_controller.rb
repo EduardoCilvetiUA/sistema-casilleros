@@ -4,13 +4,17 @@ class ControllersController < ApplicationController
   before_action :set_controller, only: [ :update, :destroy, :sync ] # Removemos :edit
 
   def index
-    @controllers =Controller.all
+    if current_user.superuser?
+      @controllers =Controller.all
+    else
+      @controllers =Controller.where(user_id: current_user.id)
+    end
     @new_controller = Controller.new
   end
 
   def create
     @controller = current_user.controllers.build(controller_params)
-
+    @controller.model_id = current_user.active_model_id
     respond_to do |format|
       if @controller.save
         format.html {

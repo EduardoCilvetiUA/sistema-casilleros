@@ -1,0 +1,48 @@
+<%# app/views/controllers/_modal_edit_model.html.erb %>
+<div class="modal fade" 
+     id="editModelUserModal_<%= user.id %>"
+     tabindex="-1"
+     data-controller="modal"
+     aria-labelledby="editModelUserModalLabel_<%= user.id %>" 
+     aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Modelo del Usuario</h5>
+        <button type="button" 
+                class="btn-close" 
+                data-bs-dismiss="modal" 
+                aria-label="Close"></button>
+      </div>
+      
+      <%= form_with(model: user,
+                    url: update_model_user_path(user),
+                    method: :patch,
+                    local: true,
+                    data: { 
+                      action: "submit->modal#submitForm"
+                    }) do |f| %>
+        <div class="modal-body">
+          <div class="mb-3">
+            <%= f.label :model_id, 'Modelo de IA', class: 'form-label' %>
+            <%= f.collection_select :active_model_id, 
+                                  Model.where(active: true, user_id: user.id),
+                                  :id, 
+                                  :name, 
+                                  { prompt: 'Selecciona un modelo' }, 
+                                  { class: 'form-select', required: true } %>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" 
+                  class="btn btn-secondary" 
+                  data-bs-dismiss="modal">Cancelar</button>
+          <%= f.submit 'Actualizar Modelo', 
+                      class: 'btn btn-primary',
+                      data: { disable_with: 'Actualizando...' } %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

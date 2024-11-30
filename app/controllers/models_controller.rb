@@ -1,12 +1,15 @@
 # app/controllers/models_controller.rb
 class ModelsController < ApplicationController
   before_action :authenticate_user!
-  before_action :check_superuser, except: [ :index, :show ]
 
   def index
-    @models = Model.all
-    @new_model = Model.new if current_user&.is_superuser
-    6.times { @new_model.gestures.build } if current_user&.is_superuser
+    if current_user.is_superuser?
+      @models = Model.all
+    else
+      @models = Model.where(user_id: current_user.id)
+    end
+    @new_model = Model.new
+    6.times { @new_model.gestures.build }
   end
 
   def show
@@ -15,7 +18,7 @@ class ModelsController < ApplicationController
 
   def new
     @model = Model.new
-    6.times { @new_model.gestures.build } if current_user&.is_superuser
+    6.times { @new_model.gestures.build }
   end
 
   def create
@@ -33,6 +36,7 @@ class ModelsController < ApplicationController
     puts "\nACTIVE2: #{params[:model][:active]}"
 
     @model = Model.new(model_params)
+    @model.user_id = current_user.id
 
     if @model.save
       gesture_params = params[:model][:gestures_attributes]
@@ -102,12 +106,6 @@ class ModelsController < ApplicationController
   end
 
   private
-
-  def check_superuser
-    unless current_user&.is_superuser
-      redirect_to models_path, alert: "No tienes permiso para realizar esta acción."
-    end
-  end
 
   def model_params
     params.require(:model).permit(
