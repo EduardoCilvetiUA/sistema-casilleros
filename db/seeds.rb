@@ -43,18 +43,21 @@ models = [
     name: "Modelo Básico v1",
     active: false,
     size_bytes: 500000,
+    user: super_user, # Add user association
     file_content: "Contenido del modelo básico v1"
   },
   {
     name: "Modelo Estándar v2",
     active: true,
     size_bytes: 750000,
+    user: super_user, # Add user association
     file_content: "Contenido del modelo estándar v2"
   },
   {
     name: "Modelo Premium v3",
     active: true,
     size_bytes: 1000000,
+    user: super_user, # Add user association
     file_content: "Contenido del modelo premium v3"
   }
 ].map do |model_data|

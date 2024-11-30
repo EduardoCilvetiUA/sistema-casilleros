@@ -24,6 +24,12 @@ class UsersController < ApplicationController
           # Update controller's model
           controller.update!(model_id: @user.active_model_id)
 
+          # Enviar mensaje MQTT
+          MqttService.publish_model_change(controller, old_model, new_model)
+
+          # Actualizar las contraseñas de los casilleros
+          update_locker_passwords(controller, new_model)
+
           # Send email notification
           AdminMailer.model_update_succeeded(model_update).deliver_later
         end
@@ -40,6 +46,38 @@ class UsersController < ApplicationController
   end
 
   private
+
+  def update_locker_passwords(controller, new_model)
+    # Obtener todos los casilleros asociados al controlador
+    controller.lockers.each do |locker|
+      # Seleccionar 4 gestos al azar del nuevo modelo
+      new_gestures = new_model.gestures.sample(4)
+      
+      # Limpiar contraseñas existentes
+      locker.locker_passwords.destroy_all
+      
+      # Asignar nuevos gestos
+      locker_passwords = []
+      new_gestures.each_with_index do |gesture, index|
+        locker_passwords << LockerPassword.create!(
+          locker: locker,
+          gesture: gesture,
+          position: index # Las posiciones empiezan desde 0
+        )
+      end
+  
+      # Preparar los gestos desde la base de datos para garantizar consistencia
+      saved_passwords = locker.locker_passwords.order(:position)
+      gesture_symbols = saved_passwords.map { |lp| lp.gesture.symbol }
+  
+      # Enviar mensaje MQTT con los gestos asignados
+      MqttService.publish_password_change(locker, gesture_symbols)
+    
+      # Enviar correo con los mismos gestos asignados
+      LockerMailer.password_updated(locker).deliver_later
+    end
+  end
+  
 
   def user_model_params
     params.require(:user).permit(:active_model_id)
