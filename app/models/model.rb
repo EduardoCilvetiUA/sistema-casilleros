@@ -1,6 +1,8 @@
 class Model < ApplicationRecord
   has_one_attached :file
 
+  belongs_to :user
+
   has_many :gestures, dependent: :restrict_with_error
   has_many :controllers, dependent: :restrict_with_error
   has_many :model_updates, dependent: :destroy

@@ -14,7 +14,7 @@ class ControllersController < ApplicationController
 
   def create
     @controller = current_user.controllers.build(controller_params)
-
+    @controller.model_id = current_user.active_model_id
     respond_to do |format|
       if @controller.save
         format.html {
