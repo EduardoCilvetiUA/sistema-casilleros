@@ -154,14 +154,14 @@ controllers.each do |controller|
   3.times do
     start_date = rand(30.days).seconds.ago
     completed_date = start_date + rand(30.minutes)
-    status = ['completed', 'failed', 'pending', 'in_progress'].sample
+    status = ['succeeded', 'failed', 'pending', 'in_progress'].sample
 
     ModelUpdate.create!(
       controller: controller,
       model: models.sample,
       status: status,
       started_at: start_date,
-      completed_at: ['completed', 'failed'].include?(status) ? completed_date : nil,
+      completed_at: ['succeeded', 'failed'].include?(status) ? completed_date : nil,
       created_at: start_date,
       updated_at: completed_date
     )
