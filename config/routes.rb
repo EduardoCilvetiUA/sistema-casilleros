@@ -1,17 +1,21 @@
-# config/routes.rb
 Rails.application.routes.draw do
   devise_for :users, controllers: { 
     omniauth_callbacks: 'users/omniauth_callbacks'
   }
 
+  # Rutas para superusuarios
+  authenticated :user, -> (user) { user.is_superuser? } do
+    root 'dashboard#index', as: :superuser_root
+  end
+
+  # Rutas para usuarios normales autenticados
   authenticated :user do
-    root 'dashboard#index', as: :authenticated_root
+    root 'controllers#index', as: :authenticated_root
     
     get 'dashboard', to: 'dashboard#index'
-    
     resources :controllers do
       member do
-        post :sync  # Agregar esta línea
+        post :sync
       end
       resources :lockers do
         member do
@@ -21,7 +25,6 @@ Rails.application.routes.draw do
         end
       end
     end
-     
     
     resources :models do
       member do
@@ -33,6 +36,7 @@ Rails.application.routes.draw do
       get 'usage_stats'
     end
   end
+
   namespace :mqtt do
     get 'test', to: 'test#index'
     post 'publish', to: 'test#publish'
