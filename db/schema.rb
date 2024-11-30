@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_11_28_175813) do
+ActiveRecord::Schema[7.2].define(version: 2024_11_29_033720) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -102,8 +102,10 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_28_175813) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "previous_model_id"
     t.index ["controller_id"], name: "index_model_updates_on_controller_id"
     t.index ["model_id"], name: "index_model_updates_on_model_id"
+    t.index ["previous_model_id"], name: "index_model_updates_on_previous_model_id"
   end
 
   create_table "models", force: :cascade do |t|
@@ -142,4 +144,5 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_28_175813) do
   add_foreign_key "lockers", "controllers"
   add_foreign_key "model_updates", "controllers"
   add_foreign_key "model_updates", "models"
+  add_foreign_key "model_updates", "models", column: "previous_model_id"
 end

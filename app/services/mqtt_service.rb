@@ -5,10 +5,7 @@ class MqttService
     password_change: "Password_change",
     connection: "Conexion",
     owner_change: "Owner_change",
-    model_update_start: "actualizar_modelo/inicio",
-    model_update_send: "actualizar_modelo/envio",
-    model_update_receive: "actualizar_modelo/recepcion",
-    model_update_install: "actualizar_modelo/instalacion",
+    model_update: "Cambio_modelo",
     sync: "sincronizacion",
     status_locker: "status_locker",  # New topic
     subscription_receiver: "subscription_receiver"  # New topic
@@ -94,6 +91,21 @@ class MqttService
       publish_message(TOPICS[:password_change], payload, QOS_LEVELS[:important])
     end
 
+    def publish_model_change(controller, old_model, new_model)
+      payload = {
+        controller_id: controller.id,
+        old_model: old_model.name,
+        new_model: new_model.name,
+        timestamp: Time.current.iso8601
+      }.to_json
+
+      MqttClient.publish(
+        TOPICS[:model_update],
+        payload,
+        qos: QOS_LEVELS[:important]
+      )
+    end
+
     def publish_model_update_start(controller, model)
       payload = {
         controlador_id: controller.id,
@@ -149,11 +161,11 @@ class MqttService
 
     def mark_message_processed(message_id, time)
       processed_messages[message_id] = time  # Usar el método processed_messages en lugar de @processed_messages
-      
+
       # Limpiar mensajes antiguos
       processed_messages.delete_if { |_, processed_time| Time.current - processed_time > 1.hour }
     end
-    
+
     def publish_message(topic, payload, qos, retain: false)
       Rails.logger.info "Publicando en tópico: #{topic} (QoS: #{qos})"
 
@@ -191,15 +203,15 @@ class MqttService
     def handle_mqtt_message(topic, message)
       message_id = "#{topic}-#{message.hash}"
       current_time = Time.current
-      
+
       # Solo procesar si el mensaje no ha sido procesado en los últimos X segundos
       if recently_processed?(message_id)
         Rails.logger.info "Mensaje recibido pero ignorado por ser muy reciente: #{message}"
         return
       end
-      
+
       mark_message_processed(message_id, current_time)
-      
+
       case topic
       when TOPICS[:sync]
         handle_sync_response(message)
@@ -224,11 +236,11 @@ class MqttService
     def recently_processed?(message_id)
       last_processed = processed_messages[message_id]  # Usar el método processed_messages en lugar de @processed_messages
       return false if last_processed.nil?
-      
+
       # Definir ventana de tiempo (por ejemplo, 5 segundos)
       Time.current - last_processed < 5.seconds
     end
-  
+
     def handle_sync_response(data)
       return unless data["controlador_id"]
 
@@ -340,32 +352,32 @@ class MqttService
 
     def handle_locker_status(data)
       locker = Locker.find_by(id: data["locker_id"])
-      
+
       if locker.nil?
         Rails.logger.warn "No se encontró el casillero con ID: #{data["locker_id"]}"
         return
       end
-      
+
       if locker.owner_email.blank?
         Rails.logger.warn "Casillero #{data["locker_id"]} no tiene email de propietario configurado"
         return
       end
-    
+
       # Send email to locker owner
       LockerMailer.status_notification(locker, data["status"]).deliver_later
-      
-      if data["status"] == 'open'
+
+      if data["status"] == "open"
         locker.update(state: true)
         LockerEvent.create!(
           locker: locker,
-          event_type: 'open',
+          event_type: "open",
           success: true,
           event_time: Time.current
         )
-      elsif data["status"] == 'closed'
+      elsif data["status"] == "closed"
         locker.update(state: false)
       end
-      
+
       broadcast_message(TOPICS[:status_locker], {
         locker_id: locker.id,
         status: data["status"],

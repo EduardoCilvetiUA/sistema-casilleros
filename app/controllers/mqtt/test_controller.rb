@@ -7,10 +7,7 @@ class Mqtt::TestController < ApplicationController
       locker_state: "Estado_Casillero",
       connection: "Conexion",
       owner_change: "Cambio_dueno",
-      model_update_start: "actualizar_modelo/inicio",
-      model_update_send: "actualizar_modelo/envio",
-      model_update_receive: "actualizar_modelo/recepcion",
-      model_update_install: "actualizar_modelo/instalacion"
+      model_update: "Cambio_modelo"
     }
 
     @mqtt_status = {
