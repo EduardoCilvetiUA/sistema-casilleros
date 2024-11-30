@@ -1,15 +1,7 @@
 class ModelUpdate < ApplicationRecord
-    belongs_to :controller
-    belongs_to :model
-  
-    validates :status, presence: true
-    validates :started_at, presence: true
-  
-    enum status: {
-      pending: 'pending',
-      in_progress: 'in_progress',
-      completed: 'completed',
-      failed: 'failed'
-    }
-  end
-  
+  belongs_to :controller
+  belongs_to :model
+  belongs_to :previous_model, class_name: "Model", optional: true, foreign_key: "previous_model_id"
+
+  enum status: { pending: 0, succeeded: 1, failed: 2 }
+end

@@ -52,11 +52,33 @@ class ControllersController < ApplicationController
 
   def update
     respond_to do |format|
+      original_model_id = @controller.model_id
+
       if @controller.update(controller_params)
-        format.html {
-          redirect_to controllers_path,
-          notice: "Controlador actualizado exitosamente."
-        }
+        if @controller.saved_change_to_model_id?
+          new_model = Model.find(@controller.model_id)
+          old_model = Model.find(original_model_id)
+
+          # Crear el registro de actualización
+          model_update = ModelUpdate.create!(
+            controller: @controller,
+            model: new_model,
+            previous_model: old_model,
+            status: :succeeded
+          )
+
+          # Enviar mensaje MQTT
+          MqttService.publish_model_change(@controller, old_model, new_model)
+
+          # Enviar el email con el model_update
+          AdminMailer.model_update_succeeded(model_update).deliver_later
+
+          flash[:notice] = "Controlador actualizado exitosamente. Modelo cambiado de #{old_model.name} a #{new_model.name}"
+        else
+          flash[:notice] = "Controlador actualizado exitosamente."
+        end
+
+        format.html { redirect_to controllers_path }
         format.turbo_stream {
           render turbo_stream: [
             turbo_stream.replace("controller_#{@controller.id}",
@@ -65,7 +87,7 @@ class ControllersController < ApplicationController
             ),
             turbo_stream.update("flash",
               partial: "shared/flash",
-              locals: { notice: "Controlador actualizado exitosamente." }
+              locals: { notice: flash[:notice] }
             )
           ]
         }
