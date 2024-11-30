@@ -11,7 +11,7 @@ class ModelUpdateService
       MqttClient.publish(
         "Cambio_modelo",
         {
-          controlador_id: controller.id,
+          controlador_name: controller.name,
           modelo_id: new_model.id,
           tamaño: new_model.size_bytes
         }.to_json

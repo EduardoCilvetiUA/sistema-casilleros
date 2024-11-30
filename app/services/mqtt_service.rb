@@ -93,7 +93,7 @@ class MqttService
 
     def publish_model_change(controller, old_model, new_model)
       payload = {
-        controller_id: controller.id,
+        controller_name: controller.name,
         old_model: old_model.name,
         new_model: new_model.name,
         timestamp: Time.current.iso8601
