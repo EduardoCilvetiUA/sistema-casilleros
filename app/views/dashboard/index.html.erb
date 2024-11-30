@@ -178,6 +178,13 @@
       });
     }
 
-    document.addEventListener('DOMContentLoaded', initCharts);
+    // Asegurarse de que Chart.js esté cargado antes de inicializar
+    if (typeof Chart !== 'undefined') {
+      initCharts();
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initCharts, 100);
+      });
+    }
   </script>
 <% end %>
