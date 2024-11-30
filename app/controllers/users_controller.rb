@@ -10,7 +10,7 @@ class UsersController < ApplicationController
       if @user.update(user_model_params)
         # Update all user's controllers to use the new model
         new_model = Model.find(@user.active_model_id)
-        old_model = Model.find(old_model_id)
+        old_model = old_model_id ? Model.find_by(id: old_model_id) : nil
 
         @user.controllers.each do |controller|
           # Create model update record
