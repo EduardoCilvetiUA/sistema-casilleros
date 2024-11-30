@@ -42,7 +42,7 @@ class DashboardController < ApplicationController
 
   def ensure_superuser
     unless current_user.is_superuser?
-      redirect_to root_path, alert: 'Acceso no autorizado'
+      redirect_to root_path
     end
   end
 end
