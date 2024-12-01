@@ -4,7 +4,7 @@ class Locker < ApplicationRecord
   has_many :gestures, through: :locker_passwords
   has_many :locker_events
 
-  validates :number, presence: true
+  validates :number, presence: true, uniqueness: { scope: :controller_id }
   validates :owner_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
 
   # Método para obtener la contraseña del casillero

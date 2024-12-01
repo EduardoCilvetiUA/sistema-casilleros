@@ -16,7 +16,10 @@
         <div class="modal-body">
           <div class="mb-3">
             <%= f.label :number, 'Número', class: 'form-label' %>
-            <%= f.number_field :number, class: 'form-control' %>
+            <%= f.select :number, 
+                        (1..4).to_a, 
+                        { prompt: "Selecciona el numero de casilleros" }, 
+                        { class: 'form-control', required: true } %>
           </div>
           
           <div class="mb-3">

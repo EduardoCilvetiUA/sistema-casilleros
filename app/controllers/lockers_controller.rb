@@ -36,11 +36,12 @@ class LockersController < ApplicationController
       # Notificar al controlador físico y manejar el envío del correo
       if MqttService.publish_owner_change(@locker, @locker.owner_email, gestures)
         redirect_to controller_lockers_path(@controller), notice: "Casillero creado exitosamente"
+        LockerMailer.owner_updated(@locker).deliver_later
       else
         redirect_to controller_lockers_path(@controller), alert: "Error al sincronizar el casillero"
       end
     else
-      redirect_to controller_lockers_path(@controller), alert: "Error al crear el casillero"
+      redirect_to controller_lockers_path(@controller), alert: "Error al crear el casillero, asegurate que el numero exista y que no este repetido"
     end
   end
 
@@ -121,7 +122,8 @@ class LockersController < ApplicationController
           success: true,
           event_time: Time.current
         )
-
+        puts "=== DEBUG OWNER ==="
+        puts "Locker ID: #{params[:id]}"
         render json: { message: "Propietario actualizado exitosamente", locker_id: @locker.id }
       else
         render json: { error: "Error al sincronizar el cambio" }, status: :unprocessable_entity
