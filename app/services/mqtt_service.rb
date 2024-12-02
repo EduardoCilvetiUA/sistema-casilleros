@@ -82,7 +82,7 @@ class MqttService
 
     def publish_password_change(locker, new_password)
       payload = {
-        casillero_id: locker.id,
+        casillero_number: locker.number,
         new_password: new_password,
         tipo: "update"
       }
