@@ -33,7 +33,7 @@ class MqttService
 
     def publish_connection_test(controller)
       payload = {
-        controlador_id: controller.id,
+        controlador_name: controller.name,
         estado: 1,
         timestamp: Time.current.iso8601,
         tipo: "test_conexion"
@@ -58,7 +58,7 @@ class MqttService
 
     def publish_locker_state(locker)
       payload = {
-        casillero_id: locker.id,
+        casillero_number: locker.number,
         estado: locker.state ? 1 : 0,
         fecha: Time.current.iso8601,
         dueno: locker.owner_email,
@@ -70,7 +70,8 @@ class MqttService
 
     def publish_owner_change(locker, new_owner, password_gestures)
       payload = {
-        casillero_id: locker.id,
+        controller_name: locker.controller.name,
+        casillero_number: locker.number,
         dueno_nuevo: new_owner,
         clave: password_gestures.map(&:id),
         tipo: "creacion"
@@ -82,6 +83,7 @@ class MqttService
 
     def publish_password_change(locker, new_password)
       payload = {
+        controller_name: locker.controller.name,
         casillero_number: locker.number,
         new_password: new_password,
         tipo: "update"
