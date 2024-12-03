@@ -8,7 +8,8 @@ class MqttService
     model_update: "Cambio_modelo",
     sync: "sincronizacion",
     status_locker: "status_locker",  # New topic
-    subscription_receiver: "subscription_receiver"  # New topic
+    subscription_receiver: "subscription_receiver",  # New topic
+    locker_action: "casillero_abrir_cerrar"  # New topic for open/close actions
   }.freeze
 
   SUBSCRIPTION_TOPICS = [
@@ -141,6 +142,19 @@ class MqttService
         Rails.logger.error "Fallo al enviar solicitud de sincronización"
         false
       end
+    end
+
+    def publish_locker_action(locker, action)
+      raise "Invalid action" unless %w[abrir cerrar].include?(action)
+      
+      payload = {
+        controller_name: locker.controller.name,
+        casillero_number: locker.number,
+        accion: action,
+        timestamp: Time.current.iso8601
+      }
+
+      publish_message(TOPICS[:locker_action], payload, QOS_LEVELS[:important])
     end
 
     private

@@ -156,8 +156,17 @@ class LockersController < ApplicationController
     render json: response
   end
 
-
-
+  def action
+    @locker = Locker.find(params[:id])
+    action = params.dig(:locker, :action)
+  
+    if MqttService.publish_locker_action(@locker, action)
+      render json: { status: 'success' }
+    else 
+      render json: { status: 'error' }, status: :unprocessable_entity
+    end
+  end
+    
   private
 
   def set_controller
