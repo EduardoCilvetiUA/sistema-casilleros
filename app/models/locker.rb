@@ -1,8 +1,8 @@
 class Locker < ApplicationRecord
   belongs_to :controller
-  has_many :locker_passwords
+  has_many :locker_passwords, dependent: :destroy
   has_many :gestures, through: :locker_passwords
-  has_many :locker_events
+  has_many :locker_events, dependent: :destroy
 
   validates :number, presence: true, uniqueness: { scope: :controller_id }
   validates :owner_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }

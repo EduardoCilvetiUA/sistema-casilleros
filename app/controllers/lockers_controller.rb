@@ -67,7 +67,7 @@ class LockersController < ApplicationController
               # Ensure the message is properly encoded to UTF-8
               message.force_encoding("UTF-8")
               data = JSON.parse(message.gsub("“", '"').gsub("”", '"'))
-              if data["casillero_id"] == @locker.id
+              if data["casillero_number"] == @locker.number
                 # Save the password in the database
                 ActiveRecord::Base.transaction do
                   LockerPasswordService.update_password(@locker, gesture_symbols)

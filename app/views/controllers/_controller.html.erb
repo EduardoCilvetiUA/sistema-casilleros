@@ -9,7 +9,6 @@
             <%= controller.location %>
           </h6>
         </div>
-        <%= render 'sync_status', controller: controller %>
       </div>
 
       <div class="card-text mb-3">
@@ -52,6 +51,13 @@
                 data-bs-target="#editControllerModal<%= controller.id %>">
           <i class="fas fa-edit me-1"></i> Editar
         </button>
+
+        <%= button_to controller_path(controller),
+                      method: :delete,
+                      class: "btn btn-danger btn-sm",
+                      data: { turbo_confirm: "¿Estás seguro que deseas eliminar este controlador?" } do %>
+          <i class="fas fa-trash me-1"></i> Eliminar
+        <% end %>
       </div>
     </div>
   </div>
