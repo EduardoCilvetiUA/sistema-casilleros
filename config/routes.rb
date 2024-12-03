@@ -22,6 +22,7 @@ Rails.application.routes.draw do
           get :password
           patch :update_password
           post :update_owner
+          post :action  # Add this line for the action endpoint
         end
       end
     end

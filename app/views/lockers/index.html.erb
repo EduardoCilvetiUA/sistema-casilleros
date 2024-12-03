@@ -29,6 +29,22 @@
                 <small class="text-muted">Dueño: <%= locker.owner_email %></small>
               </p>
               
+              <div class="btn-group w-100 mb-2">
+                <button class="btn btn-success btn-sm locker-action me-2" 
+                        data-action="abrir"
+                        data-locker-id="<%= locker.id %>"
+                        data-controller-id="<%= @controller.id %>">
+                  <i class="fas fa-lock-open me-1"></i>
+                  Abrir
+                </button>
+                <button class="btn btn-danger btn-sm locker-action ms-2" 
+                        data-action="cerrar"
+                        data-locker-id="<%= locker.id %>"
+                        data-controller-id="<%= @controller.id %>">
+                  <i class="fas fa-lock me-1"></i>
+                  Cerrar
+                </button>
+              </div>
               <button class="btn btn-outline-info btn-sm w-100 mb-2"
                       data-bs-toggle="modal"
                       data-bs-target="#viewPasswordModal"
@@ -69,3 +85,32 @@
 <%= render 'lockers/modal_update_password' %>
 <%= render 'lockers/modal_update_owner' %>
 <%= render 'lockers/modal_view_password' %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.locker-action').forEach(button => {
+    button.addEventListener('click', function() {
+      const lockerId = this.dataset.lockerId;
+      const controllerId = this.dataset.controllerId;
+      const action = this.dataset.action;
+      
+      fetch(`/controllers/${controllerId}/lockers/${lockerId}/action`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ locker: { action: action } })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert(`Casillero ${action === 'abrir' ? 'abierto' : 'cerrado'} exitosamente`);
+        } else {
+          alert('Error al ejecutar la acción');
+        }
+      });
+    });
+  });
+});
+</script>
