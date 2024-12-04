@@ -43,6 +43,7 @@
       
       <ul>
         <li><strong>Casillero ID:</strong> <%= @locker.id %></li>
+        <strong> Ubicacion: <%= @locker.controller.location %></strong>.
         <li><strong>Estado:</strong> <%= @status.humanize %></li>
         <li><strong>Fecha y Hora:</strong> <%= Time.current.strftime("%d/%m/%Y %H:%M:%S") %></li>
       </ul>

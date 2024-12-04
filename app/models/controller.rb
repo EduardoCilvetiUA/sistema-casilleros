@@ -4,7 +4,7 @@ class Controller < ApplicationRecord
   has_many :lockers, dependent: :destroy
   has_many :model_updates, dependent: :destroy
 
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: true
   validates :location, presence: true
   validates :model, presence: { message: "Debes tener un modelo activo" }
   validate :lockers_limit_not_exceeded
