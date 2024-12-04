@@ -367,10 +367,17 @@ class MqttService
     end
 
     def handle_locker_status(data)
-      locker = Locker.find_by(id: data["locker_id"])
+      controller = Controller.find_by(name: data["controller_name"])
+      
+      if controller.nil?
+        Rails.logger.warn "No se encontró el controlador con nombre: #{data["controller_name"]}"
+        return
+      end
+
+      locker = controller.lockers.find_by(number: data["locker_id"])
 
       if locker.nil?
-        Rails.logger.warn "No se encontró el casillero con ID: #{data["locker_id"]}"
+        Rails.logger.warn "No se encontró el casillero con numero: #{data["locker_id"]} en el controlador #{data["controller_name"]}"
         return
       end
 
@@ -403,6 +410,7 @@ class MqttService
       Rails.logger.error "Error handling locker status: #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
     end
+
     def handle_subscription_receiver(data)
       return unless data["casillero_id"]
 
